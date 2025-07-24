@@ -1,0 +1,34 @@
+version: '3.8'
+
+services:
+  config-service:
+    container_name: config-service
+    build: ./config-service
+    ports:
+      - "8888:8888"
+    networks:
+      - journey-network
+    environment:
+      - SERVER_PORT=8888
+      - SPRING_APPLICATION_NAME=config-service
+      - SPRING_EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-service:8761/eureka/
+    volumes:
+      - ./config-repo:/config-repo
+
+  eureka-service:
+    container_name: eureka-service
+    build: ./eureka-service
+    ports:
+      - "8761:8761"
+    networks:
+      - journey-network
+    depends_on:
+      - config-service
+    environment:
+      - SERVER_PORT=8761
+      - SPRING_APPLICATION_NAME=eureka-service
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-service:8888
+
+networks:
+  journey-network:
+    driver: bridge
