@@ -1,10 +1,10 @@
-package com.milosz.podsiadly.journeyplaner;
+package com.milosz.podsiadly.eurekaservice;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
-class JourneyPlanerApplicationTests {
+class EurekaServiceApplicationTests {
 
     @Test
     void contextLoads() {
