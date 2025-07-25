@@ -79,6 +79,25 @@ services:
     networks:
       - journey-network
 
+  music-service:
+    build: ./music-service
+    container_name: music-service
+    ports:
+      - "8082:8082"
+    depends_on:
+      config-service:
+        condition: service_started
+      eureka-service:
+        condition: service_started
+    environment:
+      - SERVER_PORT=8082
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-service:8888
+      - SPRING_EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-service:8761/eureka/
+      - SPOTIFY_CLIENT_ID=d9a786a96ea44f9bbfa5228457b11589
+      - SPOTIFY_CLIENT_SECRET=1c7be3850109498f953b58e9cde315bc
+    networks:
+      - journey-network
+
 networks:
   journey-network:
     driver: bridge
