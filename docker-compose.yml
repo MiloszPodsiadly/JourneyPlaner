@@ -29,6 +29,24 @@ services:
       - SPRING_APPLICATION_NAME=eureka-service
       - SPRING_CONFIG_IMPORT=optional:configserver:http://config-service:8888
 
+  gateway-service:
+    build: ./gateway-service
+    container_name: gateway-service
+    ports:
+      - "8080:8080"
+    depends_on:
+      config-service:
+        condition: service_started
+      eureka-service:
+        condition: service_started
+    environment:
+      - SERVER_PORT=8080
+      - SPRING_APPLICATION_NAME=gateway-service
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-service:8888
+      - SPRING_EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-service:8761/eureka/
+    networks:
+      - journey-network
+
 networks:
   journey-network:
     driver: bridge

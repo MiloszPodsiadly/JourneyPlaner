@@ -1,3 +1,4 @@
 rootProject.name = 'JourneyPlaner'
 include 'config-service'
 include 'eureka-service'
+include 'gateway-service'
