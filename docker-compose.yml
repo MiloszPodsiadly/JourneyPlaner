@@ -98,6 +98,23 @@ services:
     networks:
       - journey-network
 
+  route-service:
+    build: ./route-service
+    container_name: route-service
+    ports:
+      - "8083:8083"
+    depends_on:
+      config-service:
+        condition: service_started
+      eureka-service:
+        condition: service_started
+    environment:
+      - SERVER_PORT=8083
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-service:8888
+      - SPRING_EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-service:8761/eureka/
+    networks:
+      - journey-network
+
 networks:
   journey-network:
     driver: bridge
