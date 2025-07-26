@@ -115,6 +115,23 @@ services:
     networks:
       - journey-network
 
+  ui-service:
+    build: ./ui-service
+    container_name: ui-service
+    ports:
+      - "3001:3001"
+    depends_on:
+      config-service:
+        condition: service_started
+      eureka-service:
+        condition: service_started
+    environment:
+      - SERVER_PORT=3001
+      - SPRING_CONFIG_IMPORT=optional:configserver:http://config-service:8888
+      - SPRING_EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE=http://eureka-service:8761/eureka/
+    networks:
+      - journey-network
+
 networks:
   journey-network:
     driver: bridge

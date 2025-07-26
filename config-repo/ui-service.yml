@@ -1,0 +1,37 @@
+spring:
+  application:
+    name: ui-service
+
+  security:
+    oauth2:
+      client:
+        registration:
+          spotify:
+            client-id: d9a786a96ea44f9bbfa5228457b11589
+            client-secret: 1c7be3850109498f953b58e9cde315bc
+            scope: user-read-email,playlist-read-private
+            redirect-uri: http://127.0.0.1:3000/auth/spotify/success
+            authorization-grant-type: authorization_code
+        provider:
+          spotify:
+            authorization-uri: https://accounts.spotify.com/authorize
+            token-uri: https://accounts.spotify.com/api/token
+            user-info-uri: https://api.spotify.com/v1/me
+            user-name-attribute: id
+
+server:
+  port: 3001
+
+eureka:
+  client:
+    service-url:
+      defaultZone: ${SPRING_EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE:http://eureka-service:8761/eureka/}
+
+vaadin:
+  launch-browser: false
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
