@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: ui-service
+
+  config:
+    import: optional:configserver:http://config-service:8888
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://eureka-service:8761/eureka/
+
+server:
+  port: 3001
+
+vaadin:
+  launch-browser: false
