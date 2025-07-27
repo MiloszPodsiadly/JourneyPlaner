@@ -1,3 +1,6 @@
+jwt:
+  secret: your-256-bit-secret-your-256-bit-secret
+
 spring:
   application:
     name: gateway-service
@@ -8,6 +11,24 @@ spring:
         locator:
           enabled: true
           lower-case-service-id: true
+      routes:
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/api/users/**
+        - id: music-service
+          uri: lb://music-service
+          predicates:
+            - Path=/api/music/**
+        - id: route-service
+          uri: lb://route-service
+          predicates:
+            - Path=/api/route/**
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          secret-key: your-256-bit-secret-your-256-bit-secret
 server:
   port: 8080
 
