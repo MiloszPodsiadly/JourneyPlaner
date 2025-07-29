@@ -85,5 +85,10 @@ public class SpotifyTokenCache {
             throw new RuntimeException("❌ Błąd podczas odświeżania tokenu: " + ex.getMessage());
         }
     }
+    public synchronized void clear() {
+        this.accessToken = null;
+        this.refreshToken = null;
+        this.expiresAt = null;
+    }
 }
 

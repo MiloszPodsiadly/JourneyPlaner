@@ -3,18 +3,18 @@ package com.milosz.podsiadly.uiservice.vaadin;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.milosz.podsiadly.uiservice.dto.SpotifyPlaylistDTO;
-import com.milosz.podsiadly.uiservice.dto.SpotifyTrackDTO;
-import com.milosz.podsiadly.uiservice.security.TokenProvider;
+import com.milosz.podsiadly.uiservice.security.SpotifyTokenCache;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinService;
 import jakarta.annotation.security.PermitAll;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
@@ -28,49 +28,52 @@ import java.util.List;
 @Component
 @Route("playlists")
 @PermitAll
-public class SpotifyPlaylistsView extends VerticalLayout {
+public class SpotifyPlaylistsView extends VerticalLayout implements BeforeEnterObserver {
 
     private final RestTemplate restTemplate = new RestTemplate();
-    private final TokenProvider tokenProvider;
+    private final SpotifyTokenCache spotifyTokenCache;
     private final String musicServiceBaseUrl = "https://api.spotify.com/v1/me";
-
     private final String musicServiceBaseUrl2 = "https://api.spotify.com/v1";
 
-    public SpotifyPlaylistsView(TokenProvider tokenProvider) {
-        this.tokenProvider = tokenProvider;
+    private boolean playlistsLoaded = false;
+
+    public SpotifyPlaylistsView(SpotifyTokenCache spotifyTokenCache) {
+        this.spotifyTokenCache = spotifyTokenCache;
 
         setSpacing(true);
         setPadding(true);
         add(new H1("🎧 Twoje Playlisty Spotify"));
 
-        Button fetchButton = new Button("🔄 Pobierz Playlisty");
-        add(fetchButton);
+        add(new Button("⬅️ Wróć do menu", e -> getUI().ifPresent(ui -> ui.navigate("main-menu"))));
+    }
 
-        fetchButton.addClickListener(event -> {
-            Authentication authentication = getAuthentication();
+    @Override
+    public void beforeEnter(BeforeEnterEvent event) {
+        if (!playlistsLoaded) {
+            loadPlaylists();
+        }
+    }
 
-            if (authentication == null) {
-                Notification.show("❌ Nie jesteś zalogowany.", 3000, Notification.Position.MIDDLE);
-                return;
-            }
+    private void loadPlaylists() {
+        String token = spotifyTokenCache.getAccessToken();
 
-            String token = tokenProvider.getAccessToken(authentication);
-            if (token == null || token.isBlank()) {
-                log.warn("⚠️ Brak tokenu – przekierowanie do logowania Spotify.");
-                getUI().ifPresent(ui -> ui.getPage().setLocation("/oauth2/authorization/spotify"));
-                return;
-            }
+        if (token == null || token.isBlank()) {
+            Notification.show("❌ Brak tokenu – zaloguj się ponownie.");
+            getUI().ifPresent(ui -> ui.getPage().setLocation("/oauth2/authorization/spotify"));
+            return;
+        }
 
+        List<SpotifyPlaylistDTO> playlists = fetchPlaylists(token);
+        if (playlists == null) return;
 
-            List<SpotifyPlaylistDTO> playlists = fetchPlaylists(token);
-            if (playlists == null) return;
+        playlistsLoaded = true;
+        removeAll();
+        add(new H1("🎧 Twoje Playlisty Spotify"));
 
-            remove(fetchButton); // Ukryj przycisk po załadowaniu
-            playlists.forEach(playlist -> {
-                Button playlistButton = new Button("▶️ " + playlist.name());
-                playlistButton.addClickListener(e -> showTracks(token, playlist.id()));
-                add(playlistButton);
-            });
+        playlists.forEach(playlist -> {
+            Button playlistButton = new Button("▶️ " + playlist.name());
+            playlistButton.addClickListener(e -> showTracks(token, playlist.id()));
+            add(playlistButton);
         });
 
         add(new Button("⬅️ Wróć do menu", e -> getUI().ifPresent(ui -> ui.navigate("main-menu"))));
@@ -113,11 +116,9 @@ public class SpotifyPlaylistsView extends VerticalLayout {
         add(new H1("🎵 Utwory w playliście"));
 
         try {
-            // Build Authorization Header
             HttpHeaders headers = buildHeadersWithToken(token);
             HttpEntity<Void> entity = new HttpEntity<>(headers);
 
-            // Make request to your music service
             ResponseEntity<JsonNode> response = restTemplate.exchange(
                     musicServiceBaseUrl2 + "/playlists/" + playlistId + "/tracks",
                     HttpMethod.GET,
@@ -153,8 +154,10 @@ public class SpotifyPlaylistsView extends VerticalLayout {
             Notification.show("❌ Nie udało się załadować utworów.", 3000, Notification.Position.MIDDLE);
         }
 
-        // Back Button
-        add(new Button("⬅️ Powrót do playlist", e -> getUI().ifPresent(ui -> ui.navigate("playlists"))));
+        add(new Button("⬅️ Powrót do playlist", e -> {
+            playlistsLoaded = false; // Ensure reload
+            getUI().ifPresent(ui -> ui.navigate("playlists"));
+        }));
     }
 
     private HttpHeaders buildHeadersWithToken(String token) {
