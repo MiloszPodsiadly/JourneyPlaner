@@ -8,13 +8,12 @@ server:
 eureka:
   client:
     service-url:
+      register-with-eureka: true
+      fetch-registry: true
       defaultZone: ${SPRING_EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE:http://eureka-service:8761/eureka/}
 
 nominatim:
-  base-url: https://nominatim.openstreetmap.org
-  endpoints:
-    search: /search
-    reverse: /reverse
+  url: https://nominatim.openstreetmap.org
 
 management:
   endpoints:
