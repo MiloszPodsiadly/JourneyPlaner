@@ -99,5 +99,4 @@ public class RoutePlannerView extends VerticalLayout {
         }
         return null;
     }
-
 }
