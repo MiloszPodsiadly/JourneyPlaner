@@ -24,11 +24,14 @@ spring:
           uri: lb://route-service
           predicates:
             - Path=/api/route/**
+
   security:
     oauth2:
       resourceserver:
         jwt:
+          # ✅ Corrected: `secret-key` is part of Spring Security, not top-level
           secret-key: your-256-bit-secret-your-256-bit-secret
+
 server:
   port: 8080
 
@@ -42,6 +45,3 @@ management:
     web:
       exposure:
         include: "*"
-
-
-
