@@ -2,8 +2,10 @@ package com.milosz.podsiadly.uiservice.vaadin;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.milosz.podsiadly.uiservice.component.TripPlanSelectionDialog;
 import com.milosz.podsiadly.uiservice.dto.SpotifyPlaylistDTO;
 import com.milosz.podsiadly.uiservice.security.SpotifyTokenCache;
+import com.milosz.podsiadly.uiservice.service.TripPlanClient;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Paragraph;
@@ -25,7 +27,6 @@ import java.util.Arrays;
 import java.util.List;
 
 @Slf4j
-@Component
 @Route("playlists")
 @PermitAll
 public class SpotifyPlaylistsView extends VerticalLayout implements BeforeEnterObserver {
@@ -74,6 +75,21 @@ public class SpotifyPlaylistsView extends VerticalLayout implements BeforeEnterO
             Button playlistButton = new Button("▶️ " + playlist.name());
             playlistButton.addClickListener(e -> showTracks(token, playlist.id()));
             add(playlistButton);
+
+            Button addToPlanButton = new Button("➕ Dodaj do planu podróży");
+            addToPlanButton.addClickListener(e -> {
+                new TripPlanSelectionDialog(
+                        getSpotifyId(token), token, new TripPlanClient(), selectedPlan -> {
+                    try {
+                        new TripPlanClient().addPlaylist(selectedPlan.id(), playlist.id(), playlist.name(), token);
+                        Notification.show("🎉 Dodano playlistę do planu: " + selectedPlan.name());
+                    } catch (Exception ex) {
+                        Notification.show("❌ Nie udało się dodać playlisty.");
+                    }
+                }).open();
+            });
+
+            add(addToPlanButton);
         });
 
         add(new Button("⬅️ Wróć do menu", e -> getUI().ifPresent(ui -> ui.navigate("main-menu"))));
@@ -171,5 +187,41 @@ public class SpotifyPlaylistsView extends VerticalLayout implements BeforeEnterO
         return VaadinService.getCurrentRequest().getUserPrincipal() instanceof Authentication
                 ? (Authentication) VaadinService.getCurrentRequest().getUserPrincipal()
                 : null;
+    }
+    private String getSpotifyId(String token) {
+        try {
+            if (token == null || token.isBlank()) {
+                log.warn("⚠️ Brak tokenu Spotify – nie można pobrać ID.");
+                Notification.show("❌ Brak ważnego tokena Spotify.");
+                return null;
+            }
+
+            log.info("🔐 Using token: {}", token.substring(0, Math.min(token.length(), 10)) + "...");
+
+            HttpHeaders headers = buildHeadersWithToken(token);
+            HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+            ResponseEntity<JsonNode> response = restTemplate.exchange(
+                    "https://api.spotify.com/v1/me",
+                    HttpMethod.GET,
+                    entity,
+                    JsonNode.class
+            );
+
+            if (response.getStatusCode().is2xxSuccessful()) {
+                JsonNode body = response.getBody();
+                log.info("✅ Spotify ID: {}", body.get("id").asText());
+                return body.get("id").asText();
+            } else {
+                log.warn("❌ Spotify /me API error: {}", response.getStatusCode());
+                Notification.show("❌ Błąd przy połączeniu ze Spotify: " + response.getStatusCode());
+                return null;
+            }
+
+        } catch (Exception ex) {
+            log.error("❌ Exception when calling Spotify /me: {}", ex.getMessage(), ex);
+            Notification.show("❌ Nie udało się pobrać ID użytkownika Spotify.");
+            return null;
+        }
     }
 }

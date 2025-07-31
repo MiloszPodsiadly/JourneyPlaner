@@ -7,7 +7,6 @@ import com.vaadin.flow.router.Route;
 import org.springframework.stereotype.Component;
 
 @Route("profile")
-@Component
 public class UserProfileView extends VerticalLayout {
 
     public UserProfileView() {
