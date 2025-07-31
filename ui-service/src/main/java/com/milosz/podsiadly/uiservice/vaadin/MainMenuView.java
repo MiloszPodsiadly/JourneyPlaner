@@ -7,7 +7,6 @@ import com.vaadin.flow.router.Route;
 import org.springframework.stereotype.Component;
 
 @Route("main-menu")
-@Component
 public class MainMenuView extends VerticalLayout {
 
     public MainMenuView() {
@@ -26,7 +25,7 @@ public class MainMenuView extends VerticalLayout {
                 getUI().ifPresent(ui -> ui.navigate("profile")));
 
         Button logout = new Button("🚪 Wyloguj się", e ->
-                getUI().ifPresent(ui -> ui.getPage().setLocation("/logout")));
+                getUI().ifPresent(ui -> ui.navigate("logout")));
 
         add(playlists, route, trips, profile, logout);
         setAlignItems(Alignment.CENTER);
