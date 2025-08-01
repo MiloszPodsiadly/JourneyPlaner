@@ -82,6 +82,11 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                     : null;
 
             spotifyTokenCache.update(accessToken, refreshToken, (int) expiresIn);
+            Cookie spotifyAccessTokenCookie = new Cookie("spotify_access_token", accessToken);
+            spotifyAccessTokenCookie.setPath("/");
+            spotifyAccessTokenCookie.setHttpOnly(false);
+            spotifyAccessTokenCookie.setMaxAge((int) expiresIn);
+            response.addCookie(spotifyAccessTokenCookie);
         }
 
         // Redirect

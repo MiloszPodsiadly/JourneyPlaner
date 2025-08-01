@@ -1,20 +1,35 @@
 package com.milosz.podsiadly.uiservice.service;
-
+import com.fasterxml.jackson.databind.JsonNode;
+import lombok.extern.slf4j.Slf4j;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.milosz.podsiadly.uiservice.dto.SongDto;
+import com.milosz.podsiadly.uiservice.dto.SpotifyTrackDTO;
 import com.milosz.podsiadly.uiservice.dto.TripPlanDto;
+import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.*;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
+import java.util.Scanner;
+import com.milosz.podsiadly.uiservice.security.SpotifyTokenCache;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+@Slf4j
 @Component
 public class TripPlanClient {
 
     private final RestTemplate restTemplate = new RestTemplate();
     private final String userServiceUrl = "http://user-service:8081";
+
+
 
     public List<TripPlanDto> getUserPlans(String spotifyId, String token) {
         String url = userServiceUrl + "/api/trip-plans/user?spotifyId=" + encode(spotifyId);
@@ -108,6 +123,48 @@ public class TripPlanClient {
 
         restTemplate.exchange(url, HttpMethod.PUT, entity, Void.class);
     }
+
+    public List<SpotifyTrackDTO> getPlaylistTracks(String playlistId, String accessToken) {
+        String url = "https://api.spotify.com/v1/playlists/" + playlistId + "/tracks";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setBearerAuth(accessToken);
+        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+        HttpEntity<Void> entity = new HttpEntity<>(headers);
+
+        try {
+            ResponseEntity<JsonNode> response = restTemplate.exchange(
+                    url, HttpMethod.GET, entity, JsonNode.class
+            );
+
+            JsonNode items = response.getBody().path("items");
+            List<SpotifyTrackDTO> tracks = new ArrayList<>();
+
+            for (JsonNode item : items) {
+                JsonNode trackNode = item.path("track");
+                if (trackNode.isMissingNode() || trackNode.isNull()) continue;
+
+                String id = trackNode.path("id").asText();
+                String name = trackNode.path("name").asText();
+                String albumName = trackNode.path("album").path("name").asText();
+                String previewUrl = trackNode.path("preview_url").asText(null);
+                String externalUrl = trackNode.path("external_urls").path("spotify").asText();
+
+                List<String> artists = new ArrayList<>();
+                for (JsonNode artist : trackNode.path("artists")) {
+                    artists.add(artist.path("name").asText());
+                }
+
+                tracks.add(new SpotifyTrackDTO(id, name, artists, albumName, previewUrl, externalUrl));
+            }
+
+            return tracks;
+        } catch (Exception e) {
+            System.err.println("❌ Spotify API error: " + e.getMessage());
+            throw new RuntimeException("Spotify token może być nieważny lub błędny", e);
+        }
+    }
+
 
     private HttpHeaders headersWithAuth(String token) {
         HttpHeaders headers = new HttpHeaders();
