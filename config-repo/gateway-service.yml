@@ -25,11 +25,25 @@ spring:
           predicates:
             - Path=/api/route/**
 
+
   security:
     oauth2:
+      client:
+        registration:
+          spotify:
+            client-id: d9a786a96ea44f9bbfa5228457b11589
+            client-secret: 1c7be3850109498f953b58e9cde315bc
+            scope: user-read-email,playlist-read-private
+            redirect-uri: http://127.0.0.1:3001/login/oauth2/code/spotify
+            authorization-grant-type: authorization_code
+        provider:
+          spotify:
+            authorization-uri: https://accounts.spotify.com/authorize
+            token-uri: https://accounts.spotify.com/api/token
+            user-info-uri: https://api.spotify.com/v1/me
+            user-name-attribute: id
       resourceserver:
         jwt:
-          # ✅ Corrected: `secret-key` is part of Spring Security, not top-level
           secret-key: your-256-bit-secret-your-256-bit-secret
 
 server:
