@@ -10,7 +10,7 @@ spring:
             client-id: d9a786a96ea44f9bbfa5228457b11589
             client-secret: 1c7be3850109498f953b58e9cde315bc
             scope: user-read-email,playlist-read-private
-            redirect-uri: http://127.0.0.1:3001/login/oauth2/code/spotify
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
             authorization-grant-type: authorization_code
         provider:
           spotify:
