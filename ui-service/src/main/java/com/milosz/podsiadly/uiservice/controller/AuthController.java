@@ -1,6 +1,7 @@
 package com.milosz.podsiadly.uiservice.controller;
 
 import com.milosz.podsiadly.uiservice.config.JwtTokenUtil;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -24,7 +25,6 @@ public class AuthController {
     public ResponseEntity<?> success(Authentication authentication) {
         OAuth2User user = (OAuth2User) authentication.getPrincipal();
         String token = jwtService.generateToken(user);
-
         return ResponseEntity.ok(Map.of("token", token));
     }
 }

@@ -43,10 +43,10 @@ public class TripPlanCreateView extends VerticalLayout {
         setPadding(true);
         setWidthFull();
 
-        Button backButton = new Button("⬅ Wróć do menu", new Icon(VaadinIcon.ARROW_LEFT));
+        Button backButton = new Button("⬅ Back to menu", new Icon(VaadinIcon.ARROW_LEFT));
         backButton.addClickListener(e -> getUI().ifPresent(ui -> ui.navigate("main-menu")));
 
-        H1 title = new H1("📌 Moje Plany Podróży");
+        H1 title = new H1("📌 My Travel Plans");
         title.getStyle()
                 .set("text-align", "center")
                 .set("width", "100%")
@@ -54,7 +54,7 @@ public class TripPlanCreateView extends VerticalLayout {
         add(title);
 
         TextField search = new TextField();
-        search.setPlaceholder("Szukaj planu...");
+        search.setPlaceholder("Search plan...");
         search.setPrefixComponent(new Icon(VaadinIcon.SEARCH));
         search.setWidth("300px");
 
@@ -65,7 +65,7 @@ public class TripPlanCreateView extends VerticalLayout {
 
         HorizontalLayout filters = new HorizontalLayout();
         filters.setWidthFull();
-        filters.setJustifyContentMode(JustifyContentMode.CENTER); // wyśrodkowanie całego układu
+        filters.setJustifyContentMode(JustifyContentMode.CENTER);
         filters.setAlignItems(Alignment.CENTER);
         filters.setSpacing(true);
         filters.getStyle().set("margin-bottom", "30px");
@@ -85,7 +85,7 @@ public class TripPlanCreateView extends VerticalLayout {
                 allPlans = tripPlanClient.getUserPlans(spotifyId, token);
                 updatePlanList(plansLayout, search.getValue(), sortSelect.getValue(), token);
             } catch (Exception e) {
-                log.error("❌ Błąd pobierania planów: {}", e.getMessage());
+                log.error("❌ Error downloading plans: {}", e.getMessage());
             }
         }
 
@@ -95,7 +95,7 @@ public class TripPlanCreateView extends VerticalLayout {
         sortSelect.addValueChangeListener(e ->
                 updatePlanList(plansLayout, search.getValue(), e.getValue(), token));
 
-        Button backBottom = new Button("⬅ Wróć do menu", new Icon(VaadinIcon.ARROW_LEFT));
+        Button backBottom = new Button("⬅ Back to menu", new Icon(VaadinIcon.ARROW_LEFT));
         backBottom.addClickListener(e -> getUI().ifPresent(ui -> ui.navigate("main-menu")));
         backBottom.getStyle().set("margin-top", "30px");
         add(backBottom);
@@ -145,14 +145,14 @@ public class TripPlanCreateView extends VerticalLayout {
                 updatePlanList(layout, filter, sort, token);
             });
 
-            Button deleteBtn = new Button("Usuń plan", new Icon(VaadinIcon.TRASH));
+            Button deleteBtn = new Button("Delete plan", new Icon(VaadinIcon.TRASH));
             deleteBtn.addClickListener(ev -> {
                 tripPlanClient.deletePlan(plan.id(), token);
                 getUI().ifPresent(ui -> ui.getPage().reload());
             });
 
             HorizontalLayout actions = new HorizontalLayout(editBtn, deleteBtn);
-            Button renameBtn = new Button("✏️ Zmień nazwę i opis");
+            Button renameBtn = new Button("✏️ Change name and description");
             if (editModePlanIds.contains(plan.id())) {
                 renameBtn.addClickListener(ev -> openEditDialog(plan, token));
                 actions.add(renameBtn);
@@ -160,7 +160,7 @@ public class TripPlanCreateView extends VerticalLayout {
             card.add(name, desc, actions);
 
             if (plan.places() != null && !plan.places().isEmpty()) {
-                H4 placesHeader = new H4("📍 Miejsca");
+                H4 placesHeader = new H4("📍 Places");
                 placesHeader.getStyle().set("margin-top", "20px");
                 card.add(placesHeader);
 
@@ -170,7 +170,7 @@ public class TripPlanCreateView extends VerticalLayout {
                 placesLayout.setWidthFull();
 
                 for (var place : plan.places()) {
-                    String display = place.displayName() != null ? place.displayName() : "[Brak nazwy miejsca]";
+                    String display = place.displayName() != null ? place.displayName() : "[No place name]";
                     Button placeBtn = new Button(display);
                     placeBtn.getStyle()
                             .set("white-space", "normal")
@@ -191,7 +191,7 @@ public class TripPlanCreateView extends VerticalLayout {
             }
 
             if (plan.playlists() != null && !plan.playlists().isEmpty()) {
-                H4 playlistsHeader = new H4("🎵 Playlisty");
+                H4 playlistsHeader = new H4("🎵 Playlists");
                 playlistsHeader.getStyle().set("margin-top", "20px");
                 card.add(playlistsHeader);
 
@@ -201,7 +201,7 @@ public class TripPlanCreateView extends VerticalLayout {
                 playlistsLayout.setWidthFull();
 
                 for (var playlist : plan.playlists()) {
-                    String namePl = playlist.name() != null ? playlist.name() : "[Brak nazwy playlisty]";
+                    String namePl = playlist.name() != null ? playlist.name() : "[No playlist name]";
                     Button plBtn = new Button(namePl);
                     plBtn.getStyle()
                             .set("white-space", "normal")
@@ -209,7 +209,6 @@ public class TripPlanCreateView extends VerticalLayout {
                             .set("width", "100%");
 
                     if (editModePlanIds.contains(plan.id())) {
-                        // 🔴 W trybie edycji: pokazuje ikonę i usuwa playlistę po kliknięciu
                         plBtn.setIcon(new Icon(VaadinIcon.TRASH));
                         plBtn.addClickListener(ev -> {
                             tripPlanClient.deletePlaylist(playlist.id(), token);
@@ -226,14 +225,14 @@ public class TripPlanCreateView extends VerticalLayout {
 
                             try {
                                 String spotifyPlaylistId = playlist.playlistId();
-                                log.warn("🎧 Pobieram utwory z playlisty Spotify ID: {}", spotifyPlaylistId);
+                                log.warn("🎧 Download songs from Spotify ID playlist: {}", spotifyPlaylistId);
 
                                 Authentication auth = SecurityContextHolder.getContext().getAuthentication();
                                 String spotifyAccessToken = tokenProvider.getAccessToken(auth);
                                 var songs = tripPlanClient.getPlaylistTracks(spotifyPlaylistId, spotifyAccessToken);
 
                                 if (songs == null || songs.isEmpty()) {
-                                    content.add(new Paragraph("Brak utworów w tej playliście."));
+                                    content.add(new Paragraph("There are no songs in this playlist."));
                                 } else {
                                     UnorderedList songList = new UnorderedList();
                                     songs.forEach(song -> {
@@ -243,11 +242,11 @@ public class TripPlanCreateView extends VerticalLayout {
                                     content.add(songList);
                                 }
                             } catch (Exception ex) {
-                                content.add(new Paragraph("❌ Błąd ładowania utworów."));
-                                log.error("❌ Błąd pobierania utworów z playlisty: {}", ex.getMessage());
+                                content.add(new Paragraph("❌ Error loading songs."));
+                                log.error("❌ Error downloading songs from playlist: {}", ex.getMessage());
                             }
 
-                            Button close = new Button("⬅ Wróć do planów", new Icon(VaadinIcon.ARROW_LEFT));
+                            Button close = new Button("⬅ Back to plans", new Icon(VaadinIcon.ARROW_LEFT));
                             close.addClickListener(e -> dialog.close());
 
                             content.add(close);
@@ -264,7 +263,6 @@ public class TripPlanCreateView extends VerticalLayout {
                 }
                 card.add(playlistsLayout);
             }
-
             layout.add(card);
         }
     }
@@ -272,20 +270,20 @@ public class TripPlanCreateView extends VerticalLayout {
 
     private void openEditDialog(TripPlanDto plan, String token) {
         Dialog dialog = new Dialog();
-        dialog.setHeaderTitle("✏️ Edytuj plan");
+        dialog.setHeaderTitle("✏️ Edit plan");
 
-        TextField nameField = new TextField("Nazwa");
+        TextField nameField = new TextField("Name");
         nameField.setValue(plan.name());
-        TextArea descField = new TextArea("Opis");
+        TextArea descField = new TextArea("Description");
         descField.setValue(plan.description() != null ? plan.description() : "");
 
-        Button save = new Button("💾 Zapisz", e -> {
+        Button save = new Button("💾 Save", e -> {
             try {
                 tripPlanClient.updatePlan(plan.id(), nameField.getValue(), descField.getValue(), token);
                 dialog.close();
                 getUI().ifPresent(ui -> ui.getPage().reload());
             } catch (Exception ex) {
-                Notification.show("❌ Błąd zapisu");
+                Notification.show("❌ Error save");
             }
         });
 
@@ -310,18 +308,6 @@ public class TripPlanCreateView extends VerticalLayout {
         if (cookies != null) {
             for (Cookie cookie : cookies) {
                 if ("jwt".equals(cookie.getName())) {
-                    return cookie.getValue();
-                }
-            }
-        }
-        return null;
-    }
-    private String extractSpotifyAccessTokenFromCookie() {
-        Cookie[] cookies = VaadinService.getCurrentRequest().getCookies();
-        if (cookies != null) {
-            for (Cookie cookie : cookies) {
-                if ("spotify_access_token".equals(cookie.getName())) {
-                    log.info("✅ Używam tokenu Spotify z ciasteczka: {}", cookie.getValue());  // <--- dodaj log
                     return cookie.getValue();
                 }
             }
