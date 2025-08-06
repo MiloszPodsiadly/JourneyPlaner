@@ -11,6 +11,7 @@ public class UiServiceApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(UiServiceApplication.class, args);
 	}
+
 	@Bean
 	public RestTemplate restTemplate() {
 		return new RestTemplate();

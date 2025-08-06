@@ -1,11 +1,18 @@
 package com.milosz.podsiadly.userservice.service;
 
+import com.milosz.podsiadly.userservice.entity.TripPlan;
+import com.milosz.podsiadly.userservice.entity.TripPlace;
+import com.milosz.podsiadly.userservice.entity.TripPlaylist;
+import com.milosz.podsiadly.userservice.entity.User;
+import com.milosz.podsiadly.userservice.repository.TripPlanRepository;
+import com.milosz.podsiadly.userservice.repository.TripPlaceRepository;
+import com.milosz.podsiadly.userservice.repository.TripPlaylistRepository;
+import com.milosz.podsiadly.userservice.repository.UserRepository;
 
-import com.milosz.podsiadly.userservice.entity.*;
-import com.milosz.podsiadly.userservice.repository.*;
-import com.milosz.podsiadly.userservice.service.TripPlanService;
 import jakarta.transaction.Transactional;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.stereotype.Service;
 
 import java.util.List;

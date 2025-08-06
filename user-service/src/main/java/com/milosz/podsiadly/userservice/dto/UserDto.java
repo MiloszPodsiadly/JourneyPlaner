@@ -1,4 +1,3 @@
-// UserDto.java
 package com.milosz.podsiadly.userservice.dto;
 
 import java.util.List;

@@ -3,7 +3,9 @@ package com.milosz.podsiadly.userservice.controller;
 import com.milosz.podsiadly.userservice.dto.CreateUserRequest;
 import com.milosz.podsiadly.userservice.entity.User;
 import com.milosz.podsiadly.userservice.repository.UserRepository;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
