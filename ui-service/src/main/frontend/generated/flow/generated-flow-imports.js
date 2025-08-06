@@ -1,5 +1,11 @@
-import '@vaadin/common-frontend/ConnectionIndicator.js';
 import '@vaadin/polymer-legacy-adapter/style-modules.js';
+import '@vaadin/vertical-layout/theme/lumo/vaadin-vertical-layout.js';
+import '@vaadin/tooltip/theme/lumo/vaadin-tooltip.js';
+import '@vaadin/button/theme/lumo/vaadin-button.js';
+import 'Frontend/generated/jar-resources/disableOnClickFunctions.js';
+import '@vaadin/notification/theme/lumo/vaadin-notification.js';
+import 'Frontend/generated/jar-resources/flow-component-renderer.js';
+import '@vaadin/common-frontend/ConnectionIndicator.js';
 import '@vaadin/vaadin-lumo-styles/color-global.js';
 import '@vaadin/vaadin-lumo-styles/typography-global.js';
 import '@vaadin/vaadin-lumo-styles/sizing.js';
@@ -10,14 +16,17 @@ import 'Frontend/generated/jar-resources/ReactRouterOutletElement.tsx';
 
 const loadOnDemand = (key) => {
   const pending = [];
-  if (key === '0430dfa78a905da6fb6f10a292b0830a0af4e2923afbc18fa82aae6f7b683403') {
-    pending.push(import('./chunks/chunk-e045ef5a031e111b82410052df809428f03e3f7ba390a8b9f35fceb5b00478e4.js'));
+  if (key === '0602fe0aa3c2563d2c3b80d72157b9373eae68df2969b8db1331aa82fff7ad49') {
+    pending.push(import('./chunks/chunk-f803df643c07aa37eee57a440b68a91abb3cd3408a72bcc573024c04162131e4.js'));
+  }
+  if (key === '385dd6ae902a59f7db7459618f93f6d81cdf61ab6c1c190eaf2955f65c648b2a') {
+    pending.push(import('./chunks/chunk-cd6a3b6f6faebed1493d078a30ed7b10109a53d1122ed5addaf07959b749bfe6.js'));
   }
   if (key === '0361c7bdaa63285d8a4a330c15827ddaabb31c1dc31c4f0e40235eee91be2ef3') {
     pending.push(import('./chunks/chunk-e045ef5a031e111b82410052df809428f03e3f7ba390a8b9f35fceb5b00478e4.js'));
   }
-  if (key === '385dd6ae902a59f7db7459618f93f6d81cdf61ab6c1c190eaf2955f65c648b2a') {
-    pending.push(import('./chunks/chunk-cd6a3b6f6faebed1493d078a30ed7b10109a53d1122ed5addaf07959b749bfe6.js'));
+  if (key === '0430dfa78a905da6fb6f10a292b0830a0af4e2923afbc18fa82aae6f7b683403') {
+    pending.push(import('./chunks/chunk-e045ef5a031e111b82410052df809428f03e3f7ba390a8b9f35fceb5b00478e4.js'));
   }
   if (key === '52ba0ab5e9c6f88fb1f298024e81683b11c05fd7c355afd877f4f3d3fd2910b6') {
     pending.push(import('./chunks/chunk-cd6a3b6f6faebed1493d078a30ed7b10109a53d1122ed5addaf07959b749bfe6.js'));

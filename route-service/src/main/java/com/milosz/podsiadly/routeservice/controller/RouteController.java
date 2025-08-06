@@ -31,7 +31,7 @@ public class RouteController {
                     return ResponseEntity.notFound().build();
                 }
             } catch (Exception ex) {
-                ex.printStackTrace(); // Optional: Replace with logger.error(...) in production
+                ex.printStackTrace();
                 return ResponseEntity.internalServerError().build();
             }
         }

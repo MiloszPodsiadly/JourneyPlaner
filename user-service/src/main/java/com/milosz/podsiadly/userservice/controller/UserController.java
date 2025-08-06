@@ -20,7 +20,7 @@ public class UserController {
     @PostMapping("/create")
     public ResponseEntity<Void> createUserIfNotExists(@RequestBody CreateUserRequest request) {
         if (userRepository.existsBySpotifyId(request.spotifyId())) {
-            return ResponseEntity.ok().build(); // już istnieje
+            return ResponseEntity.ok().build();
         }
 
         var user = User.builder()
@@ -30,7 +30,7 @@ public class UserController {
                 .build();
 
         userRepository.save(user);
-        return ResponseEntity.ok().build(); // nowy użytkownik zapisany
+        return ResponseEntity.ok().build();
     }
 }
 

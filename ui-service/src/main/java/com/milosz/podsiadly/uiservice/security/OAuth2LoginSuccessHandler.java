@@ -46,7 +46,8 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
         // Save JWT in cookie
         Cookie cookie = new Cookie("jwt", jwt);
-        cookie.setHttpOnly(true);
+        cookie.setSecure(false); // match your cookie config
+        cookie.setHttpOnly(false); // match original flags
         cookie.setPath("/");
         cookie.setMaxAge(86400);
         response.addCookie(cookie);
@@ -61,7 +62,9 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             Cookie spotifyIdCookie = new Cookie("spotify_id", spotifyId);
             spotifyIdCookie.setPath("/");
             spotifyIdCookie.setMaxAge(86400);
-            spotifyIdCookie.setHttpOnly(false);
+            spotifyIdCookie.setSecure(false); // match your cookie config
+            spotifyIdCookie.setHttpOnly(false); // match original flags
+
             response.addCookie(spotifyIdCookie);
 
             // ⬇️ Register user in user-service if not exists
@@ -84,7 +87,8 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             spotifyTokenCache.update(accessToken, refreshToken, (int) expiresIn);
             Cookie spotifyAccessTokenCookie = new Cookie("spotify_access_token", accessToken);
             spotifyAccessTokenCookie.setPath("/");
-            spotifyAccessTokenCookie.setHttpOnly(false);
+            spotifyAccessTokenCookie.setSecure(false); // match your cookie config
+            spotifyAccessTokenCookie.setHttpOnly(false); // match original flags
             spotifyAccessTokenCookie.setMaxAge((int) expiresIn);
             response.addCookie(spotifyAccessTokenCookie);
         }

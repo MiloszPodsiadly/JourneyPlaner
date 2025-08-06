@@ -45,7 +45,7 @@ public class RouteService {
                     : null;
 
         } catch (Exception ex) {
-            ex.printStackTrace(); // Optional: Replace with logger.error(...)
+            ex.printStackTrace();
             return null;
         }
     }
@@ -72,8 +72,8 @@ public class RouteService {
             return response.getBody() != null ? response.getBody() : List.of();
 
         } catch (Exception ex) {
-            ex.printStackTrace(); // Optional: Replace with logger.error(...)
-            return List.of(); // Return empty list on error
+            ex.printStackTrace();
+            return List.of();
         }
     }
     public LocationDto[] searchPlacesByCategory(String city, String category) {
@@ -100,7 +100,7 @@ public class RouteService {
 
         } catch (Exception ex) {
             ex.printStackTrace();
-            return new LocationDto[0]; // empty array on error
+            return new LocationDto[0];
         }
     }
 }
