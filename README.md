@@ -40,6 +40,7 @@
 ### 🗺️ Microservices Architecture
 
 ```
+
                                      +------------------+
                                      |  config-service  |
                                      +------------------+
