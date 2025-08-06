@@ -1,27 +1,25 @@
 package com.milosz.podsiadly.uiservice.service;
+
 import com.fasterxml.jackson.databind.JsonNode;
-import lombok.extern.slf4j.Slf4j;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.milosz.podsiadly.uiservice.dto.SongDto;
 import com.milosz.podsiadly.uiservice.dto.SpotifyTrackDTO;
 import com.milosz.podsiadly.uiservice.dto.TripPlanDto;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.*;
+
+import lombok.extern.slf4j.Slf4j;
+
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
-import com.milosz.podsiadly.uiservice.security.SpotifyTokenCache;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
+
 @Slf4j
 @Component
 public class TripPlanClient {
@@ -56,7 +54,6 @@ public class TripPlanClient {
         );
 
         HttpEntity<Map<String, String>> entity = new HttpEntity<>(body, headers);
-
         return restTemplate.exchange(url, HttpMethod.POST, entity, TripPlanDto.class).getBody();
     }
 
@@ -161,7 +158,7 @@ public class TripPlanClient {
             return tracks;
         } catch (Exception e) {
             System.err.println("❌ Spotify API error: " + e.getMessage());
-            throw new RuntimeException("Spotify token może być nieważny lub błędny", e);
+            throw new RuntimeException("Spotify token may be invalid or incorrect", e);
         }
     }
 

@@ -1,7 +1,7 @@
 # 🚀 JourneyPlanner – Full Stack Microservice App
 
 **Plan smarter, travel better.**  
-**Built with 💚 Vaadin + Spring Boot + Microservices.**
+**Built with  Vaadin + Spring Boot + Microservices.**
 
 ---
 
@@ -11,63 +11,64 @@
 
 🔗 Uses multiple microservices like:
 
-- `gateway-service` 
+- `gateway-service` (Gateway service)
 - `user-service` (Create user with spotify credentials)
 - `route-service` (Nominatim finding places)
 - `music-service` (Spotify playlists and tracks)
 - `ui-service` (Vaadin frontend with SecurityFilterChain)
 - `eureka-service` (Service Discovery)
 - `config-service` (Centralized config)
-- `config-repo` 
+- `config-repo` (Files with dev configuration)
 
 ---
 
 ### 🧰 Tech Stack
 
-| Layer         | Tech                                                     |
-|---------------|-----------------------------------------------------------|
-| Frontend      | 🔵 Vaadin (Java UI Framework)                            |
-| Backend       | ☕ Spring Boot 5.4.3, Spring Security, Spring Cloud       |
-| Auth          | 🔐 OAuth2, JWT-based auth (no roles)                     |
-| DevOps        | 🐳 Docker, Docker Compose, Gradle                        |
-| Routing       | 🌐 Spring Cloud Gateway                                  |
-| Discovery     | 🧭 Netflix Eureka                                        |
-| Data Layer    | 💾 PostgreSQL via Docker                                 |
-| Tests         | ❌ No test database currently configured                 |
+| Layer         | Tech                                                   |
+|---------------|--------------------------------------------------------|
+| Frontend      | 🔵 Vaadin (Java UI Framework)                          |
+| Backend       | ☕ Spring Boot 5.4.3, Spring Security, Spring Cloud    |
+| Auth          | 🔐 OAuth2, JWT-based auth (no roles)                   |
+| DevOps        | 🐳 Docker, Docker Compose, Gradle                      |
+| Routing       | 🌐 Spring Cloud Gateway                                |
+| Discovery     | 🧭 Netflix Eureka                                      |
+| Data Layer    | 💾 PostgreSQL via Docker                               |
+| Tests         | ❌ No test currently configured                        |
 
 ---
 
 ### 🗺️ Microservices Architecture
 
 ```
-                              +------------------+
-                              |  config-service  |
-                              +------------------+
-                                        |
-                                        v
-                            +----------------------+
-                            |    eureka-service    |
-                            +-----------+--------- +
-                                        |
-                                        v
-           +-----------------+------------------+-------------------+
-           |                 |                  |                   |
-           v                 v                  v                   v  
-   +---------------+ +---------------+ +------------------+ +-------------+
-   | user-service  | | route-service | |   music-service  | | ui-service |
-   +---------------+ +---------------+ +------------------+ +-------------+
-           \                 |                  |                   /
-            +----------------+------------------+------------------+
-                                        |
-                                        v
-                             +----------------------+
-                             |   gateway-service    |
-                             +----------------------+
-                                        |
-                                        v
-                             +----------------------+
-                             |       frontend       |
-                             +----------------------+
+
+                                     +------------------+
+                                     |  config-service  |
+                                     +------------------+
+                                               |
+                                               v
+                                   +----------------------+
+                                   |    eureka-service    |
+                                   +-----------+--------- +
+                                               |
+                                               v
+                  +-----------------+------------------+-------------------+
+                  |                 |                  |                   |
+                  v                 v                  v                   v  
+          +---------------+ +---------------+ +------------------+ +-------------+
+          | user-service  | | route-service | |   music-service  | | ui-service  |
+          +---------------+ +---------------+ +------------------+ +-------------+
+                  \                 |                  |                   /
+                   +----------------+------------------+------------------+
+                                               |
+                                               v
+                                    +----------------------+
+                                    |   gateway-service    |
+                                    +----------------------+
+                                               |
+                                               v
+                                    +----------------------+
+                                    |       frontend       |
+                                    +----------------------+
 ```
 
 ---
@@ -75,7 +76,6 @@
 ### 🔐 Security
 
 - **OAuth2 Login** with `.successHandler(...)`
-- **Form-based login** fallback (`formLogin().disable()` optional)
 - **Logout configuration** in `ui-service` and `gateway-service`
   - Session invalidation
   - Cookie cleanup (`jwt`, `spotify_access_token`)
@@ -93,7 +93,10 @@ docker-compose up --build
 ---
 
 ### 🖼️ Frontend (Vaadin)
-
+- **Visit:**
+```bash
+127.0.0.1:3001/login
+```
 - **Reactive UI** using Vaadin 24
 - **Spring Security-aware views**
 - **JWT-aware access logic**
@@ -139,7 +142,7 @@ JourneyPlanner/
 
 ---
 
-### 🧑‍💻 Maintainer
+### 🧑‍💻 Maintainer 💚
 
 - **Milosz Podsiadly**
 - ✉️ [m.podsiadly99@gmail.com](mailto:m.podsiadly99@gmail.com)

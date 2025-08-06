@@ -2,10 +2,12 @@ package com.milosz.podsiadly.uiservice.security;
 
 import com.milosz.podsiadly.uiservice.config.JwtTokenUtil;
 import com.milosz.podsiadly.uiservice.service.UserClient;
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClient;
 import org.springframework.security.oauth2.client.OAuth2AuthorizedClientService;
@@ -44,34 +46,28 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         OAuth2User principal = (OAuth2User) authentication.getPrincipal();
         String jwt = jwtTokenUtil.generateToken(principal);
 
-        // Save JWT in cookie
         Cookie cookie = new Cookie("jwt", jwt);
-        cookie.setSecure(false); // match your cookie config
-        cookie.setHttpOnly(false); // match original flags
+        cookie.setSecure(false);
+        cookie.setHttpOnly(false);
         cookie.setPath("/");
         cookie.setMaxAge(86400);
         response.addCookie(cookie);
 
-        // Extract Spotify user data
         String spotifyId = principal.getAttribute("id");
         String email = principal.getAttribute("email");
         String name = principal.getAttribute("display_name");
 
         if (spotifyId != null) {
-            // Save Spotify ID in cookie
             Cookie spotifyIdCookie = new Cookie("spotify_id", spotifyId);
             spotifyIdCookie.setPath("/");
             spotifyIdCookie.setMaxAge(86400);
-            spotifyIdCookie.setSecure(false); // match your cookie config
-            spotifyIdCookie.setHttpOnly(false); // match original flags
-
+            spotifyIdCookie.setSecure(false);
+            spotifyIdCookie.setHttpOnly(false);
             response.addCookie(spotifyIdCookie);
 
-            // ⬇️ Register user in user-service if not exists
             userClient.createUserIfNotExists(spotifyId, name, email);
         }
 
-        // Cache Spotify tokens
         OAuth2AuthorizedClient authorizedClient = authorizedClientService.loadAuthorizedClient(
                 "spotify", authentication.getName());
 
@@ -87,13 +83,11 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             spotifyTokenCache.update(accessToken, refreshToken, (int) expiresIn);
             Cookie spotifyAccessTokenCookie = new Cookie("spotify_access_token", accessToken);
             spotifyAccessTokenCookie.setPath("/");
-            spotifyAccessTokenCookie.setSecure(false); // match your cookie config
-            spotifyAccessTokenCookie.setHttpOnly(false); // match original flags
+            spotifyAccessTokenCookie.setSecure(false);
+            spotifyAccessTokenCookie.setHttpOnly(false);
             spotifyAccessTokenCookie.setMaxAge((int) expiresIn);
             response.addCookie(spotifyAccessTokenCookie);
         }
-
-        // Redirect
         response.sendRedirect("/main-menu");
     }
 }

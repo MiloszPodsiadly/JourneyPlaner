@@ -1,8 +1,9 @@
 package com.milosz.podsiadly.uiservice.config;
 
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
 import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.security.Keys;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Component;
@@ -30,4 +31,3 @@ public class JwtTokenUtil {
                 .compact();
     }
 }
-

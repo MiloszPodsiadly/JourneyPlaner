@@ -6,11 +6,13 @@ import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.orderedlayout.FlexComponent.Alignment;
 import com.vaadin.flow.router.Route;
+
 import jakarta.annotation.security.PermitAll;
+
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
+
 
 @Route("login")
 @PermitAll
@@ -33,7 +35,7 @@ public class LoginView extends VerticalLayout {
             ClientRegistration registration = clientRegistrationRepository.findByRegistrationId("spotify");
 
             if (registration != null) {
-                String loginUrl = "/oauth2/authorization/spotify"; // Spring handles this route
+                String loginUrl = "/oauth2/authorization/spotify";
                 UI.getCurrent().getPage().setLocation(loginUrl);
             } else {
                 Notification.show("Spotify client not configured.", 3000, Notification.Position.MIDDLE);

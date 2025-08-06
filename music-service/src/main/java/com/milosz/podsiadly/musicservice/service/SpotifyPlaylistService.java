@@ -1,9 +1,15 @@
 package com.milosz.podsiadly.musicservice.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
+
 import com.milosz.podsiadly.musicservice.dto.SpotifyPlaylistDTO;
+
 import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
