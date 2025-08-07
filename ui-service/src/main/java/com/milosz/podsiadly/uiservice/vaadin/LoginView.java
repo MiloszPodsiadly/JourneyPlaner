@@ -33,7 +33,7 @@ public class LoginView extends VerticalLayout {
             ClientRegistration registration = clientRegistrationRepository.findByRegistrationId("spotify");
 
             if (registration != null) {
-                String loginUrl = "/oauth2/authorization/spotify"; // Spring handles this route
+                String loginUrl = "/oauth2/authorization/spotify";
                 UI.getCurrent().getPage().setLocation(loginUrl);
             } else {
                 Notification.show("Spotify client not configured.", 3000, Notification.Position.MIDDLE);
