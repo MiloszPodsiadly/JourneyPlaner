@@ -16,5 +16,4 @@ class UiServiceApplicationTests {
 	@Test
 	void contextLoads() {
 	}
-
 }
