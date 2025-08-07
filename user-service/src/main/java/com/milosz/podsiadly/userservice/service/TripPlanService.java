@@ -1,6 +1,5 @@
 package com.milosz.podsiadly.userservice.service;
 
-
 import com.milosz.podsiadly.userservice.entity.TripPlan;
 
 import java.util.List;

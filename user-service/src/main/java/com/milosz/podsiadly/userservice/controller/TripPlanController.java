@@ -6,13 +6,24 @@ import com.milosz.podsiadly.userservice.dto.TripPlanDto;
 import com.milosz.podsiadly.userservice.dto.TripPlaylistDto;
 import com.milosz.podsiadly.userservice.entity.TripPlace;
 import com.milosz.podsiadly.userservice.entity.TripPlaylist;
-import com.milosz.podsiadly.userservice.service.TripPlanService;
-import com.milosz.podsiadly.userservice.mapper.TripPlanMapper;
 import com.milosz.podsiadly.userservice.mapper.TripPlaceMapper;
+import com.milosz.podsiadly.userservice.mapper.TripPlanMapper;
 import com.milosz.podsiadly.userservice.mapper.TripPlaylistMapper;
+import com.milosz.podsiadly.userservice.service.TripPlanService;
+
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 import java.util.Map;
@@ -34,7 +45,6 @@ public class TripPlanController {
         );
         return ResponseEntity.ok(TripPlanMapper.toDto(plan));
     }
-
 
     @GetMapping("/user")
     public ResponseEntity<List<TripPlanDto>> getUserPlans(@RequestParam String spotifyId) {
@@ -91,6 +101,7 @@ public class TripPlanController {
         tripPlanService.removePlaylistFromTrip(tripPlaylistId);
         return ResponseEntity.noContent().build();
     }
+
     @PutMapping("/{tripPlanId}/update")
     public ResponseEntity<Void> updateTripPlan(
             @PathVariable Long tripPlanId,

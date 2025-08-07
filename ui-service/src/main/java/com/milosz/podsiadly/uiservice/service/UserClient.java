@@ -1,11 +1,13 @@
 package com.milosz.podsiadly.uiservice.service;
 
 
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.Map;
+import java.util.Map;;
 
 @Component
 public class UserClient {
@@ -30,7 +32,7 @@ public class UserClient {
         try {
             restTemplate.postForEntity(url, request, Void.class);
         } catch (Exception e) {
-            System.err.println("❌ Nie udało się zarejestrować użytkownika: " + e.getMessage());
+            System.err.println("❌ Failed to register user: " + e.getMessage());
         }
     }
 }

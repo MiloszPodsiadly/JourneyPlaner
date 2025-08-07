@@ -2,8 +2,7 @@ package com.milosz.podsiadly.uiservice.config;
 
 import com.milosz.podsiadly.uiservice.security.OAuth2LoginSuccessHandler;
 import com.milosz.podsiadly.uiservice.security.OidcLogoutHandler;
-import com.milosz.podsiadly.uiservice.security.SpotifyTokenCache;
-import jakarta.servlet.http.HttpServletResponse;
+
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.Customizer;

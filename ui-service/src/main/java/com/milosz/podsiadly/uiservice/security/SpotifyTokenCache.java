@@ -1,6 +1,10 @@
 package com.milosz.podsiadly.uiservice.security;
 
-import org.springframework.http.*;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
@@ -8,6 +12,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.Map;
+
 
 @Component
 public class SpotifyTokenCache {
@@ -24,7 +29,7 @@ public class SpotifyTokenCache {
     public synchronized void update(String accessToken, String refreshToken, int expiresInSeconds) {
         this.accessToken = accessToken;
         this.refreshToken = refreshToken;
-        this.expiresAt = Instant.now().plusSeconds(expiresInSeconds - 60); // bufor bezpieczeństwa
+        this.expiresAt = Instant.now().plusSeconds(expiresInSeconds - 60);
     }
 
     public synchronized String getAccessToken() {
@@ -45,14 +50,12 @@ public class SpotifyTokenCache {
 
         String tokenUrl = "https://accounts.spotify.com/api/token";
 
-        // Buduj nagłówki
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
         String authValue = clientId + ":" + clientSecret;
         String encodedAuth = Base64.getEncoder().encodeToString(authValue.getBytes(StandardCharsets.UTF_8));
         headers.set("Authorization", "Basic " + encodedAuth);
 
-        // Buduj ciało żądania
         String body = "grant_type=refresh_token&refresh_token=" + refreshToken;
         HttpEntity<String> request = new HttpEntity<>(body, headers);
 
@@ -68,21 +71,20 @@ public class SpotifyTokenCache {
                 Integer expiresIn = (Integer) bodyMap.get("expires_in");
                 this.expiresAt = Instant.now().plusSeconds(expiresIn != null ? expiresIn : 3600);
 
-                // Spotify czasem zwraca nowy refresh_token – aktualizuj, jeśli jest
                 if (bodyMap.containsKey("refresh_token")) {
                     this.refreshToken = (String) bodyMap.get("refresh_token");
                 }
 
                 System.out.println("✅ Access token refreshed.");
             } else {
-                throw new RuntimeException("❌ Nie udało się odświeżyć tokenu: " + response.getStatusCode());
+                throw new RuntimeException("❌ Failed to refresh token: " + response.getStatusCode());
             }
 
         } catch (Exception ex) {
             ex.printStackTrace();
             this.accessToken = null;
             this.expiresAt = null;
-            throw new RuntimeException("❌ Błąd podczas odświeżania tokenu: " + ex.getMessage());
+            throw new RuntimeException("❌ Error refreshing token: " + ex.getMessage());
         }
     }
     public synchronized void clear() {
