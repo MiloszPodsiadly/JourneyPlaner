@@ -162,7 +162,6 @@ public class TripPlanClient {
         }
     }
 
-
     private HttpHeaders headersWithAuth(String token) {
         HttpHeaders headers = new HttpHeaders();
         headers.set("User-Agent", "travel-app");

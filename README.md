@@ -90,7 +90,19 @@ docker-compose up --build
 ```
 
 ---
+### 🖼️ Spotify Accounts 
 
+Due to restrictions and **Spotify** policy, access to the application is with provided credentials or login via Apple account.
+
+**Email**
+```bash
+accspotifyadvjourneyplaner@gmail.com
+```
+**Password**
+```bash
+JourneyPlaner1
+```
+---
 ### 🖼️ Frontend (Vaadin)
 - **Visit** 
 ```bash

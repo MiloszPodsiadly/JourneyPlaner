@@ -3,7 +3,6 @@ package com.milosz.podsiadly.userservice.controller;
 import com.milosz.podsiadly.userservice.dto.CreateUserRequest;
 import com.milosz.podsiadly.userservice.service.UserService;
 
-import com.milosz.podsiadly.userservice.service.UserService;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.ResponseEntity;
