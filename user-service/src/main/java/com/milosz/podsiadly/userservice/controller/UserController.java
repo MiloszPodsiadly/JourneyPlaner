@@ -1,11 +1,8 @@
 package com.milosz.podsiadly.userservice.controller;
 
 import com.milosz.podsiadly.userservice.dto.CreateUserRequest;
-import com.milosz.podsiadly.userservice.entity.User;
-import com.milosz.podsiadly.userservice.repository.UserRepository;
-
+import com.milosz.podsiadly.userservice.service.UserService;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,21 +14,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class UserController {
 
-    private final UserRepository userRepository;
+    private final UserService userService;
 
     @PostMapping("/create")
     public ResponseEntity<Void> createUserIfNotExists(@RequestBody CreateUserRequest request) {
-        if (userRepository.existsBySpotifyId(request.spotifyId())) {
-            return ResponseEntity.ok().build();
-        }
-
-        var user = User.builder()
-                .spotifyId(request.spotifyId())
-                .name(request.name())
-                .email(request.email())
-                .build();
-
-        userRepository.save(user);
+        userService.createUserIfNotExists(request);
         return ResponseEntity.ok().build();
     }
 }

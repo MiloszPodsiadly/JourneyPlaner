@@ -27,7 +27,7 @@ public class RouteService {
 
     public LocationDto searchPlace(String query) {
         try {
-            String url = String.format("%s/search?format=json&q=%s&limit=1", nominatimBaseUrl, query);
+            String url = String.format("%s/search?format=json&q=%s&limit=3", nominatimBaseUrl, query);
             System.out.println("🌍 Calling Nominatim with URL = " + url);
             HttpHeaders headers = new HttpHeaders();
             headers.set("User-Agent", "travel-app");

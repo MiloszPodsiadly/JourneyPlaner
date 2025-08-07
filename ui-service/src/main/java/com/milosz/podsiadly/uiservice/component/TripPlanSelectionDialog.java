@@ -63,4 +63,3 @@ public class TripPlanSelectionDialog extends Dialog {
         add(layout);
     }
 }
-
