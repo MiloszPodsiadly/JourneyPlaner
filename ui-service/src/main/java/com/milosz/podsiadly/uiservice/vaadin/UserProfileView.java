@@ -14,4 +14,3 @@ public class UserProfileView extends VerticalLayout {
         add(new Button("⬅️ Back to menu", e -> getUI().ifPresent(ui -> ui.navigate("main-menu"))));
     }
 }
-

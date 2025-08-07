@@ -1,7 +1,7 @@
 # 🚀 JourneyPlanner – Full Stack Microservice App
 
 **Plan smarter, travel better.**  
-**Built with  Vaadin + Spring Boot + Microservices.**
+**Built with 💚 Vaadin + Spring Boot + Microservices.**
 
 ---
 
@@ -24,51 +24,50 @@
 
 ### 🧰 Tech Stack
 
-| Layer         | Tech                                                   |
-|---------------|--------------------------------------------------------|
-| Frontend      | 🔵 Vaadin (Java UI Framework)                          |
-| Backend       | ☕ Spring Boot 5.4.3, Spring Security, Spring Cloud    |
-| Auth          | 🔐 OAuth2, JWT-based auth (no roles)                   |
-| DevOps        | 🐳 Docker, Docker Compose, Gradle                      |
-| Routing       | 🌐 Spring Cloud Gateway                                |
-| Discovery     | 🧭 Netflix Eureka                                      |
-| Data Layer    | 💾 PostgreSQL via Docker                               |
-| Tests         | ❌ No test currently configured                        |
+| Layer         | Tech                                                 |
+|---------------|------------------------------------------------------|
+| Frontend      | 🔵 Vaadin (Java UI Framework)                        |
+| Backend       | ☕ Spring Boot 5.4.3, Spring Security, Spring Cloud  |
+| Auth          | 🔐 OAuth2, JWT-based auth (no roles)                 |
+| DevOps        | 🐳 Docker, Docker Compose, Gradle                    |
+| Routing       | 🌐 Spring Cloud Gateway                              |
+| Discovery     | 🧭 Netflix Eureka                                    |
+| Data Layer    | 💾 PostgreSQL via Docker                             |
+| Tests         | ✅ Implemented with JUnit & Mockito                  |
 
 ---
 
 ### 🗺️ Microservices Architecture
 
 ```
-
-                                     +------------------+
-                                     |  config-service  |
-                                     +------------------+
-                                               |
-                                               v
-                                   +----------------------+
-                                   |    eureka-service    |
-                                   +-----------+--------- +
-                                               |
-                                               v
-                  +-----------------+------------------+-------------------+
-                  |                 |                  |                   |
-                  v                 v                  v                   v  
-          +---------------+ +---------------+ +------------------+ +-------------+
-          | user-service  | | route-service | |   music-service  | | ui-service  |
-          +---------------+ +---------------+ +------------------+ +-------------+
-                  \                 |                  |                   /
-                   +----------------+------------------+------------------+
-                                               |
-                                               v
-                                    +----------------------+
-                                    |   gateway-service    |
-                                    +----------------------+
-                                               |
-                                               v
-                                    +----------------------+
-                                    |       frontend       |
-                                    +----------------------+
+                                              +------------------+
+                                              |  config-service  |
+                                              +------------------+
+                                                        |
+                                                        v
+                                            +----------------------+
+                                            |    eureka-service    |
+                                            +-----------+--------- +
+                                                        |
+                                                        v
+                           +-----------------+------------------+-------------------+
+                           |                 |                  |                   |
+                           v                 v                  v                   v  
+                  +---------------+ +---------------+ +------------------+ +----------------+
+                  | user-service  | | route-service | |   music-service  | |   ui-service   |
+                  +---------------+ +---------------+ +------------------+ +----------------+
+                          \                 |                  |                   /
+                           +----------------+------------------+------------------+
+                                                       |
+                                                       v
+                                            +----------------------+
+                                            |   gateway-service    |
+                                            +----------------------+
+                                                       |
+                                                       v
+                                            +----------------------+
+                                            |       frontend       |
+                                            +----------------------+
 ```
 
 ---
@@ -93,7 +92,7 @@ docker-compose up --build
 ---
 
 ### 🖼️ Frontend (Vaadin)
-- **Visit:**
+- **Visit** 
 ```bash
 127.0.0.1:3001/login
 ```
@@ -109,7 +108,6 @@ docker-compose up --build
 Environment config is handled via **Spring Cloud Config**. Supported profiles:
 
 - `docker` (default for compose)
-- No test DB profile
 
 Configuration stored in `config-repo` and pulled during service startup.
 

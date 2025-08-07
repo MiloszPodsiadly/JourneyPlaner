@@ -1,8 +1,8 @@
 package com.milosz.podsiadly.routeservice.controller;
 
-import com.milosz.podsiadly.routeservice.dto.AddressDto;
 import com.milosz.podsiadly.routeservice.dto.LocationDto;
 import com.milosz.podsiadly.routeservice.service.RouteService;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -47,7 +47,7 @@ public class RouteController {
                 return ResponseEntity.notFound().build();
             }
         } catch (Exception ex) {
-            ex.printStackTrace(); // Optional: Replace with logger.error(...) in production
+            ex.printStackTrace();
             return ResponseEntity.internalServerError().build();
         }
     }
