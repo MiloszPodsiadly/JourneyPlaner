@@ -1,6 +1,6 @@
 package com.milosz.podsiadly.routeservice.service;
 
-import com.milosz.podsiadly.routeservice.dto.AddressDto;
+
 import com.milosz.podsiadly.routeservice.dto.LocationDto;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
