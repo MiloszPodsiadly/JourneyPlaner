@@ -17,6 +17,8 @@ import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.router.BeforeEnterObserver;
 import com.vaadin.flow.router.Route;
 
+
+
 import jakarta.annotation.security.PermitAll;
 
 import lombok.extern.slf4j.Slf4j;
@@ -48,10 +50,17 @@ public class SpotifyPlaylistsView extends VerticalLayout implements BeforeEnterO
 
         setSpacing(true);
         setPadding(true);
-        add(new H1("🎧 Your Spotify Playlists"));
 
+        setDefaultHorizontalComponentAlignment(Alignment.CENTER);
+        setJustifyContentMode(JustifyContentMode.START);
+
+        getStyle().set("max-width", "720px");
+        getStyle().set("margin", "0 auto");
+
+        add(new H1("🎧 Your Spotify Playlists"));
         add(new Button("⬅️ Back to menu", e -> getUI().ifPresent(ui -> ui.navigate("main-menu"))));
     }
+
 
     @Override
     public void beforeEnter(BeforeEnterEvent event) {
@@ -164,7 +173,10 @@ public class SpotifyPlaylistsView extends VerticalLayout implements BeforeEnterO
 
                     String artists = artistNames.isEmpty() ? "Unknown artist" : String.join(", ", artistNames);
 
-                    add(new Paragraph("• " + name + " – " + artists));
+                    Paragraph row = new Paragraph("• " + name + " – " + artists);
+                    row.setWidthFull();
+                    row.getStyle().set("text-align", "center");
+                    add(row);
                 }
             } else {
                 Notification.show("❗ No songs to display.", 3000, Notification.Position.MIDDLE);
@@ -176,7 +188,7 @@ public class SpotifyPlaylistsView extends VerticalLayout implements BeforeEnterO
         }
 
         add(new Button("⬅️ Back to playlists", e -> {
-            playlistsLoaded = false; // Ensure reload
+            playlistsLoaded = false;
             getUI().ifPresent(ui -> ui.navigate("playlists"));
         }));
     }

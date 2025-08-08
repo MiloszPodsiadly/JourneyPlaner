@@ -26,8 +26,9 @@ public class TripPlanSelectionDialog extends Dialog {
         layout.setSpacing(true);
 
         List<TripPlanDto> plans = client.getUserPlans(spotifyId, token);
+
         Select<TripPlanDto> planSelect = new Select<>();
-        planSelect.setLabel("📋 Exisitng plans");
+        planSelect.setLabel("📋 Existing plans");
         planSelect.setItems(plans);
         planSelect.setItemLabelGenerator(TripPlanDto::name);
 
@@ -43,22 +44,33 @@ public class TripPlanSelectionDialog extends Dialog {
 
         TextField nameField = new TextField("📌 Name of the new plan");
         TextField descField = new TextField("📝 Plan description");
+
         Button createBtn = new Button("🆕 Create", e -> {
-            String name = nameField.getValue();
-            String desc = descField.getValue();
+            String name = nameField.getValue() != null ? nameField.getValue().trim() : "";
+            String desc = descField.getValue() != null ? descField.getValue().trim() : "";
+
             if (name.isBlank()) {
-                Notification.show("⚠️ Plan name is required.");
+                Notification.show("⚠️ Plan name is required.", 3000, Notification.Position.MIDDLE);
                 return;
             }
+
+            boolean duplicate = plans.stream()
+                    .anyMatch(p -> p.name() != null && p.name().trim().equalsIgnoreCase(name));
+            if (duplicate) {
+                Notification.show("⚠️ A plan with this name already exists.", 3000, Notification.Position.MIDDLE);
+                return;
+            }
+
             try {
                 TripPlanDto newPlan = client.createPlan(spotifyId, name, desc, token);
                 onPlanSelected.accept(newPlan);
                 close();
             } catch (Exception ex) {
-                log.error("❌Failed to create a plan: {}", ex.getMessage());
+                log.error("❌ Failed to create a plan: {}", ex.getMessage(), ex);
                 Notification.show("❌ Plan creation error.");
             }
         });
+
         layout.add(planSelect, selectBtn, nameField, descField, createBtn);
         add(layout);
     }

@@ -1,13 +1,9 @@
 package com.milosz.podsiadly.routeservice.service;
 
-
 import com.milosz.podsiadly.routeservice.dto.RouteResponse;
-import com.milosz.podsiadly.routeservice.service.OsrmClient;
 import com.milosz.podsiadly.routeservice.dto.TripPlaceView;
-import com.milosz.podsiadly.routeservice.service.UserServiceClient;
 import org.springframework.stereotype.Service;
 
-import java.util.Comparator;
 import java.util.List;
 
 @Service
@@ -23,21 +19,20 @@ public class JourneyService {
 
     public RouteResponse routeByTripPlan(Long tripPlanId, boolean optimize, String jwt) {
         List<TripPlaceView> places = userServiceClient.getPlacesForTripPlan(tripPlanId, jwt);
-        if (places == null || places.size() < 2) {
-            throw new IllegalArgumentException("Need at least 2 places to create a route");
-        }
+        ensureAtLeastTwo(places);
 
         List<double[]> coords = places.stream()
-                .map(p -> new double[]{p.lat(), p.lon()}) // [lat, lon]
+                .map(p -> new double[]{p.lat(), p.lon()})
                 .toList();
         List<Long> ids = places.stream().map(TripPlaceView::id).toList();
 
-        var result = optimize ? osrmClient.tripOptimize(coords) : osrmClient.routeKeepOrder(coords);
+        OsrmClient.Result result = optimize
+                ? osrmClient.tripOptimize(coords)
+                : osrmClient.routeKeepOrder(coords);
 
         List<Long> orderedIds = optimize && result.waypoints() != null
                 ? result.waypoints().stream()
-                .sorted(Comparator.comparingInt(w -> w.waypoint_index))
-                .map(w -> ids.get(w.waypoint_index))
+                .map(wp -> ids.get(wp.waypoint_index))
                 .toList()
                 : ids;
 
@@ -47,5 +42,49 @@ public class JourneyService {
                 result.geometry(),
                 orderedIds
         );
+    }
+
+    public RouteResponse routeDrivingByTripPlan(Long tripPlanId, String jwt) {
+        return buildSimpleRoute(tripPlanId, jwt, Mode.DRIVING);
+    }
+
+    public RouteResponse routeWalkingByTripPlan(Long tripPlanId, String jwt) {
+        return buildSimpleRoute(tripPlanId, jwt, Mode.WALKING);
+    }
+
+    public RouteResponse routeCyclingByTripPlan(Long tripPlanId, String jwt) {
+        return buildSimpleRoute(tripPlanId, jwt, Mode.CYCLING);
+    }
+
+    private enum Mode { DRIVING, WALKING, CYCLING }
+
+    private RouteResponse buildSimpleRoute(Long tripPlanId, String jwt, Mode mode) {
+        List<TripPlaceView> places = userServiceClient.getPlacesForTripPlan(tripPlanId, jwt);
+        ensureAtLeastTwo(places);
+
+        List<double[]> coords = places.stream()
+                .map(p -> new double[]{p.lat(), p.lon()})
+                .toList();
+        List<Long> ids = places.stream().map(TripPlaceView::id).toList();
+
+        OsrmClient.Result result =
+                switch (mode) {
+                    case DRIVING -> osrmClient.routeKeepOrderDriving(coords);
+                    case WALKING -> osrmClient.routeKeepOrderWalking(coords);
+                    case CYCLING -> osrmClient.routeKeepOrderCycling(coords);
+                };
+
+        return new RouteResponse(
+                result.distance(),
+                result.duration(),
+                result.geometry(),
+                ids
+        );
+    }
+
+    private static void ensureAtLeastTwo(List<TripPlaceView> places) {
+        if (places == null || places.size() < 2) {
+            throw new IllegalArgumentException("Need at least 2 places to create a route");
+        }
     }
 }

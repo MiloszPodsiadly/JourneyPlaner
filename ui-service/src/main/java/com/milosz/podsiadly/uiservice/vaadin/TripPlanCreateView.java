@@ -3,12 +3,18 @@ package com.milosz.podsiadly.uiservice.vaadin;
 import com.milosz.podsiadly.uiservice.dto.TripPlanDto;
 import com.milosz.podsiadly.uiservice.security.TokenProvider;
 import com.milosz.podsiadly.uiservice.service.TripPlanClient;
+
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
+import com.vaadin.flow.component.dnd.DragSource;
+import com.vaadin.flow.component.dnd.DropEffect;
+import com.vaadin.flow.component.dnd.DropTarget;
 import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
@@ -16,24 +22,22 @@ import com.vaadin.flow.component.textfield.TextArea;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.server.VaadinService;
+
 import jakarta.servlet.http.Cookie;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Route("my-trips")
 public class TripPlanCreateView extends VerticalLayout {
 
-    @Autowired
-    private TokenProvider tokenProvider;
+    @Autowired private TokenProvider tokenProvider;
+
     private final TripPlanClient tripPlanClient = new TripPlanClient();
     private List<TripPlanDto> allPlans = List.of();
     private final Set<Long> editModePlanIds = new HashSet<>();
@@ -47,10 +51,7 @@ public class TripPlanCreateView extends VerticalLayout {
         backButton.addClickListener(e -> getUI().ifPresent(ui -> ui.navigate("main-menu")));
 
         H1 title = new H1("📌 My Travel Plans");
-        title.getStyle()
-                .set("text-align", "center")
-                .set("width", "100%")
-                .set("margin-bottom", "30px");
+        title.getStyle().set("text-align", "center").set("width", "100%").set("margin-bottom", "30px");
         add(title);
 
         TextField search = new TextField();
@@ -69,7 +70,6 @@ public class TripPlanCreateView extends VerticalLayout {
         filters.setAlignItems(Alignment.CENTER);
         filters.setSpacing(true);
         filters.getStyle().set("margin-bottom", "30px");
-
         filters.add(backButton, search, sortSelect);
         add(filters);
 
@@ -85,7 +85,8 @@ public class TripPlanCreateView extends VerticalLayout {
                 allPlans = tripPlanClient.getUserPlans(spotifyId, token);
                 updatePlanList(plansLayout, search.getValue(), sortSelect.getValue(), token);
             } catch (Exception e) {
-                log.error("❌ Error downloading plans: {}", e.getMessage());
+                log.error("❌ Error downloading plans: {}", e.getMessage(), e);
+                Notification.show("❌ Failed to load plans", 3000, Notification.Position.MIDDLE);
             }
         }
 
@@ -106,13 +107,12 @@ public class TripPlanCreateView extends VerticalLayout {
 
         List<TripPlanDto> filtered = allPlans.stream()
                 .filter(p -> filter == null || p.name().toLowerCase().contains(filter.toLowerCase()))
-                .sorted(sort.equals("A-Z")
+                .sorted("A-Z".equals(sort)
                         ? Comparator.comparing(TripPlanDto::name)
                         : Comparator.comparing(TripPlanDto::name).reversed())
                 .collect(Collectors.toList());
 
         for (TripPlanDto plan : filtered) {
-
             VerticalLayout card = new VerticalLayout();
             card.setWidth("100%");
             card.getStyle()
@@ -124,9 +124,8 @@ public class TripPlanCreateView extends VerticalLayout {
                     .set("background-color", "#ffffff")
                     .set("transition", "transform 0.2s ease")
                     .set("cursor", "pointer")
-                    .set("max-width", "800px")
+                    .set("max-width", "900px")
                     .set("margin", "0 auto");
-
             card.getElement().addEventListener("mouseenter", e -> card.getStyle().set("transform", "scale(1.01)"));
             card.getElement().addEventListener("mouseleave", e -> card.getStyle().set("transform", "scale(1.0)"));
 
@@ -135,20 +134,22 @@ public class TripPlanCreateView extends VerticalLayout {
             Paragraph desc = new Paragraph(plan.description());
             desc.getStyle().set("text-align", "center");
 
-            Button editBtn = new Button("Edytuj", new Icon(VaadinIcon.EDIT));
+            Button editBtn = new Button("Edit", new Icon(VaadinIcon.EDIT));
             editBtn.addClickListener(ev -> {
-                if (editModePlanIds.contains(plan.id())) {
-                    editModePlanIds.remove(plan.id());
-                } else {
-                    editModePlanIds.add(plan.id());
-                }
+                if (editModePlanIds.contains(plan.id())) editModePlanIds.remove(plan.id());
+                else editModePlanIds.add(plan.id());
                 updatePlanList(layout, filter, sort, token);
             });
 
             Button deleteBtn = new Button("Delete plan", new Icon(VaadinIcon.TRASH));
             deleteBtn.addClickListener(ev -> {
-                tripPlanClient.deletePlan(plan.id(), token);
-                getUI().ifPresent(ui -> ui.getPage().reload());
+                try {
+                    tripPlanClient.deletePlan(plan.id(), token);
+                    getUI().ifPresent(ui -> ui.getPage().reload());
+                } catch (Exception ex) {
+                    log.error("Delete failed", ex);
+                    Notification.show("❌ Failed to delete plan", 3000, Notification.Position.MIDDLE);
+                }
             });
 
             HorizontalLayout actions = new HorizontalLayout(editBtn, deleteBtn);
@@ -160,6 +161,8 @@ public class TripPlanCreateView extends VerticalLayout {
             card.add(name, desc, actions);
 
             if (plan.places() != null && !plan.places().isEmpty()) {
+                boolean editing = editModePlanIds.contains(plan.id());
+
                 H4 placesHeader = new H4("📍 Places");
                 placesHeader.getStyle().set("margin-top", "20px");
                 card.add(placesHeader);
@@ -168,25 +171,99 @@ public class TripPlanCreateView extends VerticalLayout {
                 placesLayout.setPadding(false);
                 placesLayout.setSpacing(true);
                 placesLayout.setWidthFull();
+                placesLayout.getStyle().set("background", "var(--lumo-contrast-5pct)");
+                placesLayout.getStyle().set("border-radius", "8px");
+                placesLayout.getStyle().set("padding", "6px");
 
-                for (var place : plan.places()) {
-                    String display = place.displayName() != null ? place.displayName() : "[No place name]";
-                    Button placeBtn = new Button(display);
-                    placeBtn.getStyle()
-                            .set("white-space", "normal")
-                            .set("text-align", "left")
-                            .set("width", "100%");
-
-                    if (editModePlanIds.contains(plan.id())) {
-                        placeBtn.setIcon(new Icon(VaadinIcon.TRASH));
-                        placeBtn.addClickListener(ev -> {
-                            tripPlanClient.deletePlace(place.id(), token);
-                            getUI().ifPresent(ui -> ui.getPage().reload());
-                        });
+                Runnable persistOrder = () -> {
+                    try {
+                        List<Long> orderedIds = placesLayout.getChildren()
+                                .map(c -> Long.valueOf(c.getId().orElseThrow()))
+                                .collect(Collectors.toList());
+                        tripPlanClient.reorderPlaces(plan.id(), orderedIds, token);
+                        Notification.show("✅ Order saved", 1000, Notification.Position.BOTTOM_START);
+                    } catch (Exception ex) {
+                        log.error("Reorder failed", ex);
+                        Notification.show("❌ Failed to save order", 2500, Notification.Position.MIDDLE);
                     }
-                    placesLayout.add(placeBtn);
+                };
 
-                }
+                plan.places().forEach(place -> {
+                    String display = place.displayName() != null ? place.displayName() : "[No place name]";
+
+                    HorizontalLayout row = new HorizontalLayout();
+                    row.setId(String.valueOf(place.id()));
+                    row.setWidthFull();
+                    row.setAlignItems(FlexComponent.Alignment.CENTER);
+                    row.getStyle()
+                            .set("background", "white")
+                            .set("border-radius", "8px")
+                            .set("padding", "8px 10px")
+                            .set("border", "1px solid var(--lumo-contrast-10pct)");
+
+                    Button handle = new Button(new Icon(VaadinIcon.MENU));
+                    handle.getElement().getThemeList().add("tertiary");
+                    handle.getStyle().set("cursor", "grab");
+
+                    Span label = new Span(display);
+                    label.getStyle().set("white-space", "normal");
+                    label.getStyle().set("flex", "1");
+
+                    Button del = new Button(new Icon(VaadinIcon.TRASH));
+                    del.getElement().getThemeList().add("error tertiary-inline");
+
+                    if (editing) {
+                        del.addClickListener(e -> {
+                            try {
+                                tripPlanClient.deletePlace(place.id(), token);
+                                getUI().ifPresent(ui -> ui.getPage().reload());
+                            } catch (Exception ex) {
+                                log.error("Delete place failed", ex);
+                                Notification.show("❌ Failed to delete place", 2500, Notification.Position.MIDDLE);
+                            }
+                        });
+
+                        DragSource<Button> drag = DragSource.create(handle);
+                        drag.setDraggable(true);
+                        drag.setDragData(place.id());
+                        drag.addDragStartListener(e -> handle.getStyle().set("cursor", "grabbing"));
+                        drag.addDragEndListener(e -> handle.getStyle().set("cursor", "grab"));
+
+                        DropTarget<HorizontalLayout> drop = DropTarget.create(row);
+                        drop.setDropEffect(DropEffect.MOVE);
+                        drop.addDropListener(e -> {
+                            Object data = e.getDragData().orElse(null);
+                            if (!(data instanceof Long draggedId)) return;
+
+                            Component draggedRow = placesLayout.getChildren()
+                                    .filter(c -> c.getId().isPresent() && c.getId().get().equals(String.valueOf(draggedId)))
+                                    .findFirst().orElse(null);
+                            if (draggedRow == null || draggedRow == row) return;
+
+                            int from = indexOf(placesLayout, draggedRow);
+                            int to   = indexOf(placesLayout, row);
+                            if (from < 0 || to < 0 || from == to) return;
+
+                            placesLayout.remove(draggedRow);
+                            placesLayout.addComponentAtIndex(to, draggedRow);
+
+                            Notification.show("Moved to position " + (to + 1),
+                                    1200, Notification.Position.BOTTOM_START);
+
+                            persistOrder.run();
+                        });
+
+                    } else {
+                        del.setEnabled(false);
+                        handle.setEnabled(false);
+                        row.addClickListener(e ->
+                                Notification.show(display, 1200, Notification.Position.BOTTOM_START));
+                    }
+
+                    row.add(handle, label, del);
+                    placesLayout.add(row);
+                });
+
                 card.add(placesLayout);
             }
 
@@ -203,30 +280,29 @@ public class TripPlanCreateView extends VerticalLayout {
                 for (var playlist : plan.playlists()) {
                     String namePl = playlist.name() != null ? playlist.name() : "[No playlist name]";
                     Button plBtn = new Button(namePl);
-                    plBtn.getStyle()
-                            .set("white-space", "normal")
-                            .set("text-align", "left")
-                            .set("width", "100%");
+                    plBtn.getStyle().set("white-space", "normal").set("text-align", "left").set("width", "100%");
 
                     if (editModePlanIds.contains(plan.id())) {
                         plBtn.setIcon(new Icon(VaadinIcon.TRASH));
                         plBtn.addClickListener(ev -> {
-                            tripPlanClient.deletePlaylist(playlist.id(), token);
-                            getUI().ifPresent(ui -> ui.getPage().reload());
+                            try {
+                                tripPlanClient.deletePlaylist(playlist.id(), token);
+                                getUI().ifPresent(ui -> ui.getPage().reload());
+                            } catch (Exception ex) {
+                                log.error("Delete playlist failed", ex);
+                                Notification.show("❌ Failed to delete playlist", 3000, Notification.Position.MIDDLE);
+                            }
                         });
                     } else {
                         plBtn.addClickListener(ev -> {
                             Dialog dialog = new Dialog();
                             dialog.setHeaderTitle("🎵 " + namePl);
-
                             VerticalLayout content = new VerticalLayout();
                             content.setPadding(true);
                             content.setSpacing(true);
 
                             try {
                                 String spotifyPlaylistId = playlist.playlistId();
-                                log.warn("🎧 Download songs from Spotify ID playlist: {}", spotifyPlaylistId);
-
                                 Authentication auth = SecurityContextHolder.getContext().getAuthentication();
                                 String spotifyAccessToken = tokenProvider.getAccessToken(auth);
                                 var songs = tripPlanClient.getPlaylistTracks(spotifyPlaylistId, spotifyAccessToken);
@@ -243,7 +319,7 @@ public class TripPlanCreateView extends VerticalLayout {
                                 }
                             } catch (Exception ex) {
                                 content.add(new Paragraph("❌ Error loading songs."));
-                                log.error("❌ Error downloading songs from playlist: {}", ex.getMessage());
+                                log.error("❌ Error downloading songs from playlist: {}", ex.getMessage(), ex);
                             }
 
                             Button close = new Button("⬅ Back to plans", new Icon(VaadinIcon.ARROW_LEFT));
@@ -255,39 +331,63 @@ public class TripPlanCreateView extends VerticalLayout {
                             dialog.open();
                         });
                     }
-                    if (editModePlanIds.contains(plan.id())) {
-                        renameBtn.addClickListener(ev -> openEditDialog(plan, token));
-                        actions.add(renameBtn);
-                    }
                     playlistsLayout.add(plBtn);
                 }
                 card.add(playlistsLayout);
             }
+
             layout.add(card);
         }
     }
-
 
     private void openEditDialog(TripPlanDto plan, String token) {
         Dialog dialog = new Dialog();
         dialog.setHeaderTitle("✏️ Edit plan");
 
         TextField nameField = new TextField("Name");
-        nameField.setValue(plan.name());
+        nameField.setValue(plan.name() != null ? plan.name() : "");
+        nameField.setRequired(true);
+        nameField.setMaxLength(120);
+        nameField.setClearButtonVisible(true);
+
         TextArea descField = new TextArea("Description");
         descField.setValue(plan.description() != null ? plan.description() : "");
+        descField.setMaxLength(1000);
+
+        Paragraph hint = new Paragraph("Name must be unique and not empty.");
+        hint.getStyle().set("font-size", "var(--lumo-font-size-s)").set("color", "var(--lumo-secondary-text-color)");
 
         Button save = new Button("💾 Save", e -> {
+            String newName = nameField.getValue() != null ? nameField.getValue().trim() : "";
+            String newDesc = descField.getValue() != null ? descField.getValue().trim() : "";
+
+            if (newName.isBlank()) {
+                Notification.show("⚠️ Name cannot be empty.", 2500, Notification.Position.MIDDLE);
+                return;
+            }
+            boolean duplicate = allPlans.stream()
+                    .anyMatch(p -> !Objects.equals(p.id(), plan.id())
+                            && p.name() != null
+                            && p.name().trim().equalsIgnoreCase(newName));
+            if (duplicate) {
+                Notification.show("⚠️ A plan with this name already exists.", 2500, Notification.Position.MIDDLE);
+                return;
+            }
+
             try {
-                tripPlanClient.updatePlan(plan.id(), nameField.getValue(), descField.getValue(), token);
+                tripPlanClient.updatePlan(plan.id(), newName, newDesc, token);
                 dialog.close();
                 getUI().ifPresent(ui -> ui.getPage().reload());
             } catch (Exception ex) {
-                Notification.show("❌ Error save");
+                log.error("Save failed", ex);
+                Notification.show("❌ Error saving plan", 3000, Notification.Position.MIDDLE);
             }
         });
 
-        dialog.add(nameField, descField, save);
+        Button cancel = new Button("Cancel", e -> dialog.close());
+        HorizontalLayout actions = new HorizontalLayout(save, cancel);
+
+        dialog.add(new VerticalLayout(nameField, descField, hint, actions));
         dialog.open();
     }
 
@@ -313,5 +413,14 @@ public class TripPlanCreateView extends VerticalLayout {
             }
         }
         return null;
+    }
+
+    private static int indexOf(VerticalLayout layout, Component child) {
+        int idx = 0;
+        for (Component c : layout.getChildren().toList()) {
+            if (c.equals(child)) return idx;
+            idx++;
+        }
+        return -1;
     }
 }

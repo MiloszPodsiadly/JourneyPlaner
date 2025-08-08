@@ -27,8 +27,6 @@ public class TripPlanClient {
     private final RestTemplate restTemplate = new RestTemplate();
     private final String userServiceUrl = "http://user-service:8081";
 
-
-
     public List<TripPlanDto> getUserPlans(String spotifyId, String token) {
         String url = userServiceUrl + "/api/trip-plans/user?spotifyId=" + encode(spotifyId);
 
@@ -38,7 +36,8 @@ public class TripPlanClient {
         ResponseEntity<TripPlanDto[]> response = restTemplate.exchange(
                 url, HttpMethod.GET, entity, TripPlanDto[].class);
 
-        return List.of(response.getBody());
+        TripPlanDto[] body = response.getBody();
+        return body != null ? List.of(body) : List.of();
     }
 
     public TripPlanDto createPlan(String spotifyId, String name, String desc, String token) {
@@ -121,6 +120,21 @@ public class TripPlanClient {
         restTemplate.exchange(url, HttpMethod.PUT, entity, Void.class);
     }
 
+    public void reorderPlaces(Long planId, List<Long> orderedPlaceIds, String token) {
+        String url = userServiceUrl + "/api/trip-plans/" + planId + "/places/reorder";
+
+        HttpHeaders headers = headersWithAuth(token);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+
+        Map<String, List<Long>> body = Map.of("orderedPlaceIds", orderedPlaceIds);
+        HttpEntity<Map<String, List<Long>>> entity = new HttpEntity<>(body, headers);
+
+        restTemplate.exchange(url, HttpMethod.PUT, entity, Void.class);
+
+        log.info("✅ Reordered places for plan {} -> {}", planId, orderedPlaceIds);
+    }
+
+
     public List<SpotifyTrackDTO> getPlaylistTracks(String playlistId, String accessToken) {
         String url = "https://api.spotify.com/v1/playlists/" + playlistId + "/tracks";
 
@@ -157,7 +171,7 @@ public class TripPlanClient {
 
             return tracks;
         } catch (Exception e) {
-            System.err.println("❌ Spotify API error: " + e.getMessage());
+            log.error("❌ Spotify API error: {}", e.getMessage(), e);
             throw new RuntimeException("Spotify token may be invalid or incorrect", e);
         }
     }

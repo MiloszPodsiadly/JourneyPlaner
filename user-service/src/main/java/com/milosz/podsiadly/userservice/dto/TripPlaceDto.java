@@ -6,5 +6,6 @@ public record TripPlaceDto(
         Double lat,
         Double lon,
         String category,
-        Long tripPlanId
+        Long tripPlanId,
+        Integer sortOrder
 ) {}

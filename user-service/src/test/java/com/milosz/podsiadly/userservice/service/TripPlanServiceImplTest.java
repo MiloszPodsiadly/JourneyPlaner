@@ -1,15 +1,18 @@
 package com.milosz.podsiadly.userservice.service;
 
+import com.milosz.podsiadly.userservice.entity.TripPlace;
 import com.milosz.podsiadly.userservice.entity.TripPlan;
 import com.milosz.podsiadly.userservice.entity.User;
 import com.milosz.podsiadly.userservice.repository.*;
 
 import org.junit.jupiter.api.*;
+import org.mockito.InOrder;
 
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -169,5 +172,123 @@ class TripPlanServiceImplTest {
         assertThat(tripPlan.getDescription()).isEqualTo("Updated Desc");
 
         verify(tripPlanRepository).save(tripPlan);
+    }
+    @Test
+    @DisplayName("addPlaceToTrip set sortOrder = (max + 1) when position exist")
+    void addPlaceToTrip_setsNextSortOrderFromMax() {
+        when(tripPlanRepository.findById(10L)).thenReturn(Optional.of(tripPlan));
+        when(tripPlaceRepository.findMaxSortOrderByTripPlanId(10L)).thenReturn(4);
+
+        service.addPlaceToTrip(10L, "Place", 1.0, 2.0);
+
+        verify(tripPlaceRepository).save(argThat(p ->
+                p.getTripPlan().equals(tripPlan)
+                        && p.getDisplayName().equals("Place")
+                        && p.getLat() == 1.0
+                        && p.getLon() == 2.0
+                        && p.getSortOrder() == 5
+        ));
+    }
+
+    @Test
+    @DisplayName("addPlaceToTrip set sortOrder = 0 when no position (max = null or -1)")
+    void addPlaceToTrip_setsZeroWhenNoExisting() {
+        when(tripPlanRepository.findById(10L)).thenReturn(Optional.of(tripPlan));
+        when(tripPlaceRepository.findMaxSortOrderByTripPlanId(10L)).thenReturn(null);
+
+        service.addPlaceToTrip(10L, "First", 3.3, 4.4);
+
+        verify(tripPlaceRepository).save(argThat(p ->
+                p.getSortOrder() == 0
+        ));
+    }
+
+    @Test
+    @DisplayName("getPlacesForTripPlan return list from repo in growing order after sortOrder")
+    void getPlacesForTripPlan_delegatesToRepo() {
+        TripPlace a = TripPlace.builder().id(1L).displayName("A").sortOrder(0).tripPlan(tripPlan).build();
+        TripPlace b = TripPlace.builder().id(2L).displayName("B").sortOrder(1).tripPlan(tripPlan).build();
+
+        when(tripPlaceRepository.findByTripPlanIdOrderBySortOrderAsc(10L))
+                .thenReturn(List.of(a, b));
+
+        List<TripPlace> out = service.getPlacesForTripPlan(10L);
+
+        assertThat(out).hasSize(2);
+        assertThat(out.get(0).getId()).isEqualTo(1L);
+        assertThat(out.get(1).getId()).isEqualTo(2L);
+        verify(tripPlaceRepository).findByTripPlanIdOrderBySortOrderAsc(10L);
+    }
+
+    @Test
+    @DisplayName("reorderPlaces: success – updateSortOrder called in index order")
+    void reorderPlaces_updatesOrdersInSequence() {
+        Long planId = 42L;
+        TripPlace p1 = TripPlace.builder().id(100L).sortOrder(0).tripPlan(TripPlan.builder().id(planId).build()).build();
+        TripPlace p2 = TripPlace.builder().id(200L).sortOrder(1).tripPlan(TripPlan.builder().id(planId).build()).build();
+        TripPlace p3 = TripPlace.builder().id(300L).sortOrder(2).tripPlan(TripPlan.builder().id(planId).build()).build();
+
+        when(tripPlaceRepository.findByTripPlanIdOrderBySortOrderAsc(planId))
+                .thenReturn(List.of(p1, p2, p3));
+
+        List<Long> newOrder = List.of(300L, 100L, 200L);
+        service.reorderPlaces(planId, newOrder);
+
+        InOrder inOrder = inOrder(tripPlaceRepository);
+        inOrder.verify(tripPlaceRepository).updateSortOrder(300L, 0);
+        inOrder.verify(tripPlaceRepository).updateSortOrder(100L, 1);
+        inOrder.verify(tripPlaceRepository).updateSortOrder(200L, 2);
+        inOrder.verifyNoMoreInteractions();
+    }
+
+    @Test
+    @DisplayName("reorderPlaces: throws IllegalArgumentException for empty list")
+    void reorderPlaces_throwsOnEmptyList() {
+        assertThatThrownBy(() -> service.reorderPlaces(1L, List.of()))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("cannot be empty");
+    }
+
+    @Test
+    @DisplayName("reorderPlaces:throws when size of the list is not matching")
+    void reorderPlaces_throwsOnSizeMismatch() {
+        Long planId = 7L;
+        TripPlace p1 = TripPlace.builder().id(1L).tripPlan(TripPlan.builder().id(planId).build()).build();
+        when(tripPlaceRepository.findByTripPlanIdOrderBySortOrderAsc(planId))
+                .thenReturn(List.of(p1));
+
+        assertThatThrownBy(() -> service.reorderPlaces(planId, List.of(1L, 2L)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("size mismatch");
+    }
+
+    @Test
+    @DisplayName("reorderPlaces: throws when are duplicated ID")
+    void reorderPlaces_throwsOnDuplicateIds() {
+        Long planId = 7L;
+        TripPlace p1 = TripPlace.builder().id(1L).tripPlan(TripPlan.builder().id(planId).build()).build();
+        TripPlace p2 = TripPlace.builder().id(2L).tripPlan(TripPlan.builder().id(planId).build()).build();
+
+        when(tripPlaceRepository.findByTripPlanIdOrderBySortOrderAsc(planId))
+                .thenReturn(List.of(p1, p2));
+
+        assertThatThrownBy(() -> service.reorderPlaces(planId, List.of(1L, 1L)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Duplicate");
+    }
+
+    @Test
+    @DisplayName("reorderPlaces: throws when list include ID without plan")
+    void reorderPlaces_throwsOnUnknownIds() {
+        Long planId = 7L;
+        TripPlace p1 = TripPlace.builder().id(1L).tripPlan(TripPlan.builder().id(planId).build()).build();
+        TripPlace p2 = TripPlace.builder().id(2L).tripPlan(TripPlan.builder().id(planId).build()).build();
+
+        when(tripPlaceRepository.findByTripPlanIdOrderBySortOrderAsc(planId))
+                .thenReturn(List.of(p1, p2));
+
+        assertThatThrownBy(() -> service.reorderPlaces(planId, List.of(1L, 999L)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Unknown place id");
     }
 }

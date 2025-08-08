@@ -20,6 +20,43 @@ public class OsrmClient {
         this.restTemplate = restTemplate;
     }
 
+    private enum Profile {
+        DRIVING("driving"),
+        WALKING("walking"),
+        CYCLING("cycling");
+
+        final String path;
+        Profile(String path) { this.path = path; }
+    }
+
+    public Result routeKeepOrderDriving(List<double[]> latLon) {
+        return routeKeepOrder(latLon, Profile.DRIVING);
+    }
+
+    public Result routeKeepOrderWalking(List<double[]> latLon) {
+        return routeKeepOrder(latLon, Profile.WALKING);
+    }
+
+    public Result routeKeepOrderCycling(List<double[]> latLon) {
+        return routeKeepOrder(latLon, Profile.CYCLING);
+    }
+
+    private Result routeKeepOrder(List<double[]> latLon, Profile profile) {
+        String coords = toCoords(latLon);
+        String url = BASE_URL + "/route/v1/" + profile.path + "/" + coords + "?geometries=geojson&overview=full";
+
+        RouteResponse body = restTemplate
+                .exchange(URI.create(url), HttpMethod.GET, HttpEntity.EMPTY, RouteResponse.class)
+                .getBody();
+
+        if (body == null || !"Ok".equals(body.code) || body.routes == null || body.routes.isEmpty()) {
+            throw new IllegalStateException("OSRM route failed (" + profile.path + ")");
+        }
+
+        Route r = body.routes.get(0);
+        return new Result(r.distance, r.duration, r.geometry, null);
+    }
+
     public Result routeKeepOrder(List<double[]> latLon) {
         String coords = toCoords(latLon);
         String url = BASE_URL + "/route/v1/driving/" + coords + "?geometries=geojson&overview=full";
@@ -53,7 +90,7 @@ public class OsrmClient {
 
     private String toCoords(List<double[]> latLon) {
         return latLon.stream()
-                .map(p -> p[1] + "," + p[0]) // OSRM = lon,lat
+                .map(p -> p[1] + "," + p[0])
                 .reduce((a, b) -> a + ";" + b)
                 .orElseThrow();
     }

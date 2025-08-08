@@ -7,6 +7,7 @@ import '@vaadin/text-area/theme/lumo/vaadin-text-area.js';
 import '@vaadin/vertical-layout/theme/lumo/vaadin-vertical-layout.js';
 import '@vaadin/tooltip/theme/lumo/vaadin-tooltip.js';
 import '@vaadin/icon/theme/lumo/vaadin-icon.js';
+import 'Frontend/generated/jar-resources/dndConnector.js';
 import '@vaadin/horizontal-layout/theme/lumo/vaadin-horizontal-layout.js';
 import '@vaadin/button/theme/lumo/vaadin-button.js';
 import 'Frontend/generated/jar-resources/disableOnClickFunctions.js';

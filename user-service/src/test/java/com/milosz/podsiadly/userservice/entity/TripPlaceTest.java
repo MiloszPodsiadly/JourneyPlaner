@@ -34,6 +34,7 @@ class TripPlaceTest {
                 .lat(50.0)
                 .lon(20.0)
                 .category("TestCategory")
+                .sortOrder(3)
                 .tripPlan(tripPlan);
     }
 
@@ -54,6 +55,7 @@ class TripPlaceTest {
         assertThat(tripPlace.getLat()).isEqualTo(50.0);
         assertThat(tripPlace.getLon()).isEqualTo(20.0);
         assertThat(tripPlace.getCategory()).isEqualTo("TestCategory");
+        assertThat(tripPlace.getSortOrder()).isEqualTo(3);
         assertThat(tripPlace.getTripPlan()).isEqualTo(tripPlan);
     }
 
@@ -63,12 +65,14 @@ class TripPlaceTest {
         TripPlace tripPlace = tripPlaceBuilder
                 .displayName("Overridden Place")
                 .lat(45.1234)
+                .sortOrder(7)
                 .build();
 
         assertThat(tripPlace.getDisplayName()).isEqualTo("Overridden Place");
         assertThat(tripPlace.getLat()).isEqualTo(45.1234);
         assertThat(tripPlace.getLon()).isEqualTo(20.0);
         assertThat(tripPlace.getCategory()).isEqualTo("TestCategory");
+        assertThat(tripPlace.getSortOrder()).isEqualTo(7);
     }
 
     @Test
@@ -80,6 +84,7 @@ class TripPlaceTest {
         tripPlace.setLat(10.123);
         tripPlace.setLon(15.456);
         tripPlace.setCategory("SetterCategory");
+        tripPlace.setSortOrder(0);
         tripPlace.setTripPlan(tripPlan);
 
         assertThat(tripPlace.getId()).isEqualTo(999L);
@@ -87,6 +92,7 @@ class TripPlaceTest {
         assertThat(tripPlace.getLat()).isEqualTo(10.123);
         assertThat(tripPlace.getLon()).isEqualTo(15.456);
         assertThat(tripPlace.getCategory()).isEqualTo("SetterCategory");
+        assertThat(tripPlace.getSortOrder()).isEqualTo(0);
         assertThat(tripPlace.getTripPlan()).isEqualTo(tripPlan);
     }
 }
