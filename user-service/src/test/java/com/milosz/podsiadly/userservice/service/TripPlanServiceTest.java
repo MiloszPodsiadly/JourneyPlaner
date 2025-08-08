@@ -1,5 +1,6 @@
 package com.milosz.podsiadly.userservice.service;
 
+import com.milosz.podsiadly.userservice.entity.TripPlace;
 import com.milosz.podsiadly.userservice.entity.TripPlan;
 import com.milosz.podsiadly.userservice.entity.User;
 import com.milosz.podsiadly.userservice.repository.TripPlaceRepository;
@@ -9,11 +10,13 @@ import com.milosz.podsiadly.userservice.repository.UserRepository;
 
 import org.junit.jupiter.api.*;
 import org.mockito.ArgumentCaptor;
+import org.mockito.InOrder;
 
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
 @DisplayName("TripPlanService Unit Tests")
@@ -200,5 +203,117 @@ class TripPlanServiceTest {
         assertThat(existingPlan.getDescription()).isEqualTo("New Desc");
 
         verify(tripPlanRepository).save(existingPlan);
+    }
+    @Test
+    @DisplayName("addPlaceToTrip: set sortOrder = max+1 when position exist")
+    void addPlaceToTrip_setsNextSortOrderFromMax() {
+        Long planId = 1L;
+        TripPlan plan = TripPlan.builder().id(planId).name("P").build();
+        when(tripPlanRepository.findById(planId)).thenReturn(Optional.of(plan));
+        when(tripPlaceRepository.findMaxSortOrderByTripPlanId(planId)).thenReturn(4);
+
+        tripPlanService.addPlaceToTrip(planId, "Place", 1.0, 2.0);
+
+        verify(tripPlaceRepository).save(argThat(p ->
+                p.getTripPlan().equals(plan)
+                        && p.getDisplayName().equals("Place")
+                        && p.getLat() == 1.0
+                        && p.getLon() == 2.0
+                        && p.getSortOrder() == 5
+        ));
+    }
+
+    @Test
+    @DisplayName("addPlaceToTrip: set sortOrder = 0 when no position (max=null)")
+    void addPlaceToTrip_setsZeroWhenNoExisting() {
+        Long planId = 2L;
+        TripPlan plan = TripPlan.builder().id(planId).name("P").build();
+        when(tripPlanRepository.findById(planId)).thenReturn(Optional.of(plan));
+        when(tripPlaceRepository.findMaxSortOrderByTripPlanId(planId)).thenReturn(null);
+
+        tripPlanService.addPlaceToTrip(planId, "First", 3.3, 4.4);
+
+        verify(tripPlaceRepository).save(argThat(p -> p.getSortOrder() == 0));
+    }
+
+    @Test
+    @DisplayName("getPlacesForTripPlan: return list in growing order")
+    void getPlacesForTripPlan_returnsOrderedList() {
+        Long planId = 7L;
+        TripPlace a = TripPlace.builder().id(10L).displayName("A").sortOrder(0).tripPlan(TripPlan.builder().id(planId).build()).build();
+        TripPlace b = TripPlace.builder().id(11L).displayName("B").sortOrder(1).tripPlan(TripPlan.builder().id(planId).build()).build();
+        when(tripPlaceRepository.findByTripPlanIdOrderBySortOrderAsc(planId)).thenReturn(List.of(a, b));
+
+        var out = tripPlanService.getPlacesForTripPlan(planId);
+
+        assertThat(out).hasSize(2);
+        assertThat(out.get(0).getId()).isEqualTo(10L);
+        assertThat(out.get(1).getId()).isEqualTo(11L);
+        verify(tripPlaceRepository).findByTripPlanIdOrderBySortOrderAsc(planId);
+    }
+
+    @Test
+    @DisplayName("reorderPlaces: success — updateSortOrder called by order")
+    void reorderPlaces_updatesSortOrderInSequence() {
+        Long planId = 42L;
+        TripPlace p1 = TripPlace.builder().id(100L).sortOrder(0).tripPlan(TripPlan.builder().id(planId).build()).build();
+        TripPlace p2 = TripPlace.builder().id(200L).sortOrder(1).tripPlan(TripPlan.builder().id(planId).build()).build();
+        TripPlace p3 = TripPlace.builder().id(300L).sortOrder(2).tripPlan(TripPlan.builder().id(planId).build()).build();
+        when(tripPlaceRepository.findByTripPlanIdOrderBySortOrderAsc(planId)).thenReturn(List.of(p1, p2, p3));
+
+        var newOrder = List.of(300L, 100L, 200L);
+        tripPlanService.reorderPlaces(planId, newOrder);
+
+        InOrder in = inOrder(tripPlaceRepository);
+        in.verify(tripPlaceRepository).updateSortOrder(300L, 0);
+        in.verify(tripPlaceRepository).updateSortOrder(100L, 1);
+        in.verify(tripPlaceRepository).updateSortOrder(200L, 2);
+        in.verifyNoMoreInteractions();
+    }
+
+    @Test
+    @DisplayName("reorderPlaces: throws IllegalArgumentException for empty list")
+    void reorderPlaces_throwsOnEmptyList() {
+        assertThatThrownBy(() -> tripPlanService.reorderPlaces(1L, List.of()))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("cannot be empty");
+    }
+
+    @Test
+    @DisplayName("reorderPlaces: throws when size of the list nis not matching to exisitng place")
+    void reorderPlaces_throwsOnSizeMismatch() {
+        Long planId = 9L;
+        TripPlace only = TripPlace.builder().id(1L).tripPlan(TripPlan.builder().id(planId).build()).build();
+        when(tripPlaceRepository.findByTripPlanIdOrderBySortOrderAsc(planId)).thenReturn(List.of(only));
+
+        assertThatThrownBy(() -> tripPlanService.reorderPlaces(planId, List.of(1L, 2L)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("size mismatch");
+    }
+
+    @Test
+    @DisplayName("reorderPlaces: throws when is ID duplicated")
+    void reorderPlaces_throwsOnDuplicateIds() {
+        Long planId = 10L;
+        TripPlace p1 = TripPlace.builder().id(1L).tripPlan(TripPlan.builder().id(planId).build()).build();
+        TripPlace p2 = TripPlace.builder().id(2L).tripPlan(TripPlan.builder().id(planId).build()).build();
+        when(tripPlaceRepository.findByTripPlanIdOrderBySortOrderAsc(planId)).thenReturn(List.of(p1, p2));
+
+        assertThatThrownBy(() -> tripPlanService.reorderPlaces(planId, List.of(1L, 1L)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Duplicate");
+    }
+
+    @Test
+    @DisplayName("reorderPlaces: throws when list include ID without plan")
+    void reorderPlaces_throwsOnUnknownIds() {
+        Long planId = 11L;
+        TripPlace p1 = TripPlace.builder().id(1L).tripPlan(TripPlan.builder().id(planId).build()).build();
+        TripPlace p2 = TripPlace.builder().id(2L).tripPlan(TripPlan.builder().id(planId).build()).build();
+        when(tripPlaceRepository.findByTripPlanIdOrderBySortOrderAsc(planId)).thenReturn(List.of(p1, p2));
+
+        assertThatThrownBy(() -> tripPlanService.reorderPlaces(planId, List.of(1L, 999L)))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Unknown place id");
     }
 }

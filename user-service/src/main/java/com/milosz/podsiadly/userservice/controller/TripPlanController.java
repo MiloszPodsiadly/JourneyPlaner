@@ -1,9 +1,6 @@
 package com.milosz.podsiadly.userservice.controller;
 
-import com.milosz.podsiadly.userservice.dto.CreateTripPlanRequest;
-import com.milosz.podsiadly.userservice.dto.TripPlaceDto;
-import com.milosz.podsiadly.userservice.dto.TripPlanDto;
-import com.milosz.podsiadly.userservice.dto.TripPlaylistDto;
+import com.milosz.podsiadly.userservice.dto.*;
 import com.milosz.podsiadly.userservice.entity.TripPlace;
 import com.milosz.podsiadly.userservice.entity.TripPlaylist;
 import com.milosz.podsiadly.userservice.mapper.TripPlaceMapper;
@@ -120,5 +117,11 @@ public class TripPlanController {
                 .toList();
         return ResponseEntity.ok(list);
     }
-
+    @PutMapping("/{tripPlanId}/places/reorder")
+    public ResponseEntity<Void> reorderPlaces(
+            @PathVariable Long tripPlanId,
+            @RequestBody ReorderPlacesRequest req) {
+        tripPlanService.reorderPlaces(tripPlanId, req.orderedPlaceIds());
+        return ResponseEntity.noContent().build();
+    }
 }

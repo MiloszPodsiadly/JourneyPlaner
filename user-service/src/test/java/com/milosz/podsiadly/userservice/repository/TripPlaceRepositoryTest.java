@@ -51,6 +51,7 @@ class TripPlaceRepositoryTest {
                 .lat(10.0)
                 .lon(20.0)
                 .category("Test Category")
+                .sortOrder(0)
                 .tripPlan(tripPlan)
                 .build();
     }
@@ -59,7 +60,6 @@ class TripPlaceRepositoryTest {
     void tearDown() {
         tripPlaceRepository.deleteAll();
         tripPlanRepository.deleteAll();
-
         System.out.println("⬅️ [AfterEach] Test finished. Cleaning up...");
     }
 
@@ -75,6 +75,7 @@ class TripPlaceRepositoryTest {
         assertThat(found.get().getLat()).isEqualTo(10.0);
         assertThat(found.get().getLon()).isEqualTo(20.0);
         assertThat(found.get().getCategory()).isEqualTo("Test Category");
+        assertThat(found.get().getSortOrder()).isEqualTo(0);
         assertThat(found.get().getTripPlan().getId()).isEqualTo(tripPlan.getId());
     }
 
@@ -86,6 +87,7 @@ class TripPlaceRepositoryTest {
                 .lat(1.0)
                 .lon(1.0)
                 .category("A")
+                .sortOrder(1)
                 .tripPlan(tripPlan)
                 .build();
 
@@ -94,6 +96,7 @@ class TripPlaceRepositoryTest {
                 .lat(2.0)
                 .lon(2.0)
                 .category("B")
+                .sortOrder(2)
                 .tripPlan(tripPlan)
                 .build();
 
@@ -115,5 +118,37 @@ class TripPlaceRepositoryTest {
 
         Optional<TripPlace> deleted = tripPlaceRepository.findById(saved.getId());
         assertThat(deleted).isNotPresent();
+    }
+
+    @Test
+    @DisplayName("findByTripPlanIdOrderBySortOrderAsc returns places in ascending sort order")
+    void shouldFindPlacesOrderedBySortOrder() {
+        TripPlace p1 = TripPlace.builder()
+                .displayName("P1").lat(1.0).lon(1.0).category("X").sortOrder(2).tripPlan(tripPlan).build();
+        TripPlace p2 = TripPlace.builder()
+                .displayName("P2").lat(2.0).lon(2.0).category("Y").sortOrder(0).tripPlan(tripPlan).build();
+        TripPlace p3 = TripPlace.builder()
+                .displayName("P3").lat(3.0).lon(3.0).category("Z").sortOrder(1).tripPlan(tripPlan).build();
+
+        tripPlaceRepository.saveAll(List.of(p1, p2, p3));
+
+        List<TripPlace> ordered = tripPlaceRepository.findByTripPlanIdOrderBySortOrderAsc(tripPlan.getId());
+
+        assertThat(ordered).extracting(TripPlace::getDisplayName)
+                .containsExactly("P2", "P3", "P1");
+    }
+
+    @Test
+    @DisplayName("findMaxSortOrderByTripPlanId returns max sortOrder or -1 when none")
+    void shouldFindMaxSortOrder() {
+        Integer none = tripPlaceRepository.findMaxSortOrderByTripPlanId(tripPlan.getId());
+        assertThat(none).isEqualTo(-1);
+
+        TripPlace p1 = TripPlace.builder().displayName("A").lat(0d).lon(0d).category("C").sortOrder(3).tripPlan(tripPlan).build();
+        TripPlace p2 = TripPlace.builder().displayName("B").lat(0d).lon(0d).category("C").sortOrder(7).tripPlan(tripPlan).build();
+        tripPlaceRepository.saveAll(List.of(p1, p2));
+
+        Integer max = tripPlaceRepository.findMaxSortOrderByTripPlanId(tripPlan.getId());
+        assertThat(max).isEqualTo(7);
     }
 }

@@ -13,7 +13,8 @@ public class TripPlaceMapper {
                 place.getLat(),
                 place.getLon(),
                 place.getCategory(),
-                place.getTripPlan() != null ? place.getTripPlan().getId() : null
+                place.getTripPlan() != null ? place.getTripPlan().getId() : null,
+                place.getSortOrder()
         );
     }
 
@@ -24,6 +25,7 @@ public class TripPlaceMapper {
                 .lat(dto.lat())
                 .lon(dto.lon())
                 .category(dto.category())
+                .sortOrder(dto.sortOrder() != null ? dto.sortOrder() : 0)
                 .tripPlan(dto.tripPlanId() != null ? TripPlan.builder().id(dto.tripPlanId()).build() : null)
                 .build();
     }

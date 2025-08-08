@@ -1,21 +1,12 @@
 package com.milosz.podsiadly.userservice.service;
 
-import com.milosz.podsiadly.userservice.entity.TripPlan;
-import com.milosz.podsiadly.userservice.entity.TripPlace;
-import com.milosz.podsiadly.userservice.entity.TripPlaylist;
-import com.milosz.podsiadly.userservice.entity.User;
-import com.milosz.podsiadly.userservice.repository.TripPlanRepository;
-import com.milosz.podsiadly.userservice.repository.TripPlaceRepository;
-import com.milosz.podsiadly.userservice.repository.TripPlaylistRepository;
-import com.milosz.podsiadly.userservice.repository.UserRepository;
-
+import com.milosz.podsiadly.userservice.entity.*;
+import com.milosz.podsiadly.userservice.repository.*;
 import jakarta.transaction.Transactional;
-
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -54,11 +45,16 @@ public class TripPlanServiceImpl implements TripPlanService {
     public void addPlaceToTrip(Long tripPlanId, String name, double lat, double lon) {
         TripPlan plan = tripPlanRepository.findById(tripPlanId)
                 .orElseThrow(() -> new IllegalArgumentException("Trip plan not found"));
+
+        Integer max = tripPlaceRepository.findMaxSortOrderByTripPlanId(tripPlanId);
+        int nextOrder = (max == null ? -1 : max) + 1;
+
         TripPlace place = new TripPlace();
         place.setTripPlan(plan);
         place.setDisplayName(name);
         place.setLat(lat);
         place.setLon(lon);
+        place.setSortOrder(nextOrder);
         tripPlaceRepository.save(place);
     }
 
@@ -91,11 +87,32 @@ public class TripPlanServiceImpl implements TripPlanService {
         plan.setDescription(description);
         tripPlanRepository.save(plan);
     }
+
     @Override
     public List<TripPlace> getPlacesForTripPlan(Long tripPlanId) {
-        return tripPlaceRepository.findByTripPlanIdOrderByIdAsc(tripPlanId);
+        return tripPlaceRepository.findByTripPlanIdOrderBySortOrderAsc(tripPlanId);
     }
 
+    @Override
+    public void reorderPlaces(Long tripPlanId, List<Long> orderedPlaceIds) {
+        if (orderedPlaceIds == null || orderedPlaceIds.isEmpty()) {
+            throw new IllegalArgumentException("orderedPlaceIds cannot be empty");
+        }
 
+        List<TripPlace> existing = tripPlaceRepository.findByTripPlanIdOrderBySortOrderAsc(tripPlanId);
+        if (existing.size() != orderedPlaceIds.size()) {
+            throw new IllegalArgumentException("List size mismatch");
+        }
+        Set<Long> idSet = new HashSet<>(orderedPlaceIds);
+        if (idSet.size() != orderedPlaceIds.size()) {
+            throw new IllegalArgumentException("Duplicate IDs in order");
+        }
+        if (!existing.stream().allMatch(p -> idSet.contains(p.getId()))) {
+            throw new IllegalArgumentException("Unknown place id in order");
+        }
+
+        for (int i = 0; i < orderedPlaceIds.size(); i++) {
+            tripPlaceRepository.updateSortOrder(orderedPlaceIds.get(i), i);
+        }
+    }
 }
-
