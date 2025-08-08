@@ -112,4 +112,13 @@ public class TripPlanController {
         tripPlanService.updateTripPlan(tripPlanId, name, description);
         return ResponseEntity.ok().build();
     }
+    @GetMapping("/{tripPlanId}/places")
+    public ResponseEntity<List<TripPlaceDto>> getPlaces(@PathVariable Long tripPlanId) {
+        var list = tripPlanService.getPlacesForTripPlan(tripPlanId)
+                .stream()
+                .map(TripPlaceMapper::toDto)
+                .toList();
+        return ResponseEntity.ok(list);
+    }
+
 }

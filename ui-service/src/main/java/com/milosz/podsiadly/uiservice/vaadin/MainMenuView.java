@@ -21,6 +21,9 @@ public class MainMenuView extends VerticalLayout {
         Button trips = new Button("🗺️ My Trips", e ->
                 getUI().ifPresent(ui -> ui.navigate("my-trips")));
 
+        Button journey = new Button("🚗 Create Journey Plan", e ->
+                getUI().ifPresent(ui -> ui.navigate("journey")));
+
         Button profile = new Button("⚙️ Profil", e ->
                 getUI().ifPresent(ui -> ui.navigate("profile")));
 
@@ -37,7 +40,7 @@ public class MainMenuView extends VerticalLayout {
         });
     """);
         });
-        add(playlists, route, trips, profile, logout);
+        add(playlists, route, trips, journey, profile, logout);
         setAlignItems(Alignment.CENTER);
         setSpacing(true);
     }

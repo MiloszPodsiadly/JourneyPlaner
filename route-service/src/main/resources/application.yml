@@ -13,6 +13,9 @@ eureka:
 nominatim:
   url: https://nominatim.openstreetmap.org
 
+osrm:
+  url: https://router.project-osrm.org
+
 logging:
   level:
     com.milosz.podsiadly.routeservice: DEBUG
