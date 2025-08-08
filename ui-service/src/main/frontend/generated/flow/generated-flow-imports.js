@@ -34,6 +34,9 @@ const loadOnDemand = (key) => {
   if (key === '385dd6ae902a59f7db7459618f93f6d81cdf61ab6c1c190eaf2955f65c648b2a') {
     pending.push(import('./chunks/chunk-cd6a3b6f6faebed1493d078a30ed7b10109a53d1122ed5addaf07959b749bfe6.js'));
   }
+  if (key === '452559c3101f2409b645464ec6ee2be231d4ac537bd89f1cfe7b28b19f0316eb') {
+    pending.push(import('./chunks/chunk-782232ae5d8f3763a9cd985babbb97e9a0b327b50b9fae3030d8b6f1d7cc86c0.js'));
+  }
   return Promise.all(pending);
 }
 

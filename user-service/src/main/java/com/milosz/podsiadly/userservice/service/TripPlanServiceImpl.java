@@ -91,6 +91,10 @@ public class TripPlanServiceImpl implements TripPlanService {
         plan.setDescription(description);
         tripPlanRepository.save(plan);
     }
+    @Override
+    public List<TripPlace> getPlacesForTripPlan(Long tripPlanId) {
+        return tripPlaceRepository.findByTripPlanIdOrderByIdAsc(tripPlanId);
+    }
 
 
 }
