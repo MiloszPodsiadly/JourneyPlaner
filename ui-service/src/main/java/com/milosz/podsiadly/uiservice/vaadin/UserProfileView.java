@@ -8,6 +8,7 @@ import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Span;
 import com.vaadin.flow.component.notification.Notification;
+import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -34,7 +35,6 @@ public class UserProfileView extends VerticalLayout {
 
     private final RestTemplate rest = new RestTemplate();
 
-    // Docker service URL kept as string
     private static final String PROFILE_API_BASE = "http://user-service:8081/api/user-profiles";
 
     private static final List<String> AVATARS = List.of(
@@ -61,15 +61,28 @@ public class UserProfileView extends VerticalLayout {
 
     public UserProfileView() {
         setWidth("100%");
-        setMaxWidth("1000px");
         setPadding(true);
         setSpacing(true);
+        setDefaultHorizontalComponentAlignment(Alignment.CENTER);
 
-        add(new H1("⚙️ Your Profile"));
-        add(buildHeaderRow());
-        add(buildMainForm());
-        add(buildAvatarPicker());
-        add(buildActions());
+        VerticalLayout container = new VerticalLayout();
+        container.setWidthFull();
+        container.setMaxWidth("900px");
+        container.setPadding(false);
+        container.setSpacing(true);
+        container.setDefaultHorizontalComponentAlignment(Alignment.CENTER);
+        container.getStyle().set("margin", "0 auto");
+
+        H1 title = new H1("⚙️ Your Profile");
+        title.getStyle().set("text-align", "center").set("width", "100%");
+        container.add(title);
+
+        container.add(buildHeaderRow());
+        container.add(buildMainForm());
+        container.add(buildAvatarPicker());
+        container.add(buildActions());
+
+        add(container);
 
         loadProfile();
     }
@@ -80,20 +93,21 @@ public class UserProfileView extends VerticalLayout {
         currentAvatar.getStyle().setBorderRadius("50%");
         currentAvatar.setSrc(DEFAULT_AVATAR);
 
-        displayName.setWidth("260px");
+        displayName.setWidth("320px");
         displayName.getStyle().set("margin-left", "12px");
         displayName.setRequiredIndicatorVisible(true);
         displayName.setHelperText("Required");
 
         HorizontalLayout row = new HorizontalLayout(currentAvatar, displayName);
         row.setAlignItems(Alignment.CENTER);
+        row.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
         row.setWidthFull();
         return row;
     }
 
     private FormLayout buildMainForm() {
         bio.setHeight("110px");
-        bio.setWidth("min(700px,100%)");
+        bio.setWidth("min(700px, 100%)");
 
         FormLayout form = new FormLayout();
         form.add(bio);
@@ -102,6 +116,9 @@ public class UserProfileView extends VerticalLayout {
                 new FormLayout.ResponsiveStep("0", 1),
                 new FormLayout.ResponsiveStep("640px", 2)
         );
+        // Center the form area
+        form.setWidth("min(700px, 100%)");
+        form.getStyle().set("margin", "0 auto");
         return form;
     }
 
@@ -112,6 +129,8 @@ public class UserProfileView extends VerticalLayout {
         FlexLayout grid = new FlexLayout();
         grid.getStyle().set("gap", "12px");
         grid.setWidthFull();
+        grid.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
+        grid.setAlignItems(FlexComponent.Alignment.CENTER);
 
         AVATARS.forEach(url -> {
             Image img = new Image(url, "avatar");
@@ -138,6 +157,7 @@ public class UserProfileView extends VerticalLayout {
         wrap.setPadding(false);
         wrap.setSpacing(false);
         wrap.setWidthFull();
+        wrap.setDefaultHorizontalComponentAlignment(Alignment.CENTER);
         return wrap;
     }
 
@@ -156,6 +176,8 @@ public class UserProfileView extends VerticalLayout {
         save.addClickListener(e -> saveProfile());
         HorizontalLayout actions = new HorizontalLayout(save, back);
         actions.setSpacing(true);
+        actions.setWidthFull();
+        actions.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
         return actions;
     }
 
