@@ -30,16 +30,16 @@ The system adopts **microservices principles** — modularity, scalability, resi
 
 ## 🔗 Service Portfolio
 
-| Service            | Responsibility                                                                   | Tech Highlights                                      |
-|--------------------|----------------------------------------------------------------------------------|------------------------------------------------------|
-| **config-service** | Spring Cloud Config Server – delivers runtime configuration to all microservices | Config profiles: `docker`, dynamic refresh endpoints |
-| **config-repo**    | File storing YML config files                                                    | Branch-based environment separation                  |
-| **eureka-service** | Service registry for runtime service location & load balancing                   | Netflix Eureka                                       |
-| **gateway-service**| API Gateway – request routing, cross-cutting filters                             | Spring Cloud Gateway                                 |
-| **user-service**   | Manages user profiles linked with Spotify OAuth2 accounts                        | Spring Security OAuth2 Client, PostgreSQL            |
-| **route-service**  | Fetches and processes routes using Nominatim/OSRM APIs                           | Async WebClient, caching layer                       |
-| **music-service**  | Retrieves playlists/tracks from Spotify API                                      | Spotify Web API integration                          |
-| **ui-service**     | Vaadin 24 frontend, security context-aware navigation, JWT propagation           | Vaadin, Spring Security integration                  |
+| Service           | Responsibility                                                                    | Tech Highlights                                      |
+|-------------------|-----------------------------------------------------------------------------------|------------------------------------------------------|
+| **config<br/>service** | Spring Cloud Config Server – delivers runtime configuration to all microservices  | Config profiles: `docker`, dynamic refresh endpoints |
+| **config<br/>repo**    | File storing YML config files                                                     | Branch-based environment separation                  |
+| **eureka<br/>service** | Service registry for runtime service location & load balancing                    | Netflix Eureka                                       |
+| **gateway<br/>service** | API Gateway – request routing, cross-cutting filters                              | Spring Cloud Gateway                                 |
+| **user<br/>service**   | Manages user profiles linked with Spotify OAuth2 accounts                         | Spring Security OAuth2 Client, PostgreSQL            |
+| **route<br/>service**  | Fetches and processes routes using Nominatim/OSRM APIs                            | WebClient, caching layer                       |
+| **music<br/>service**  | Retrieves playlists/tracks from Spotify API                                       | Spotify Web API integration                          |
+| **ui<br/>service**     | Vaadin 24 frontend, security context-aware navigation, JWT propagation            | Vaadin, Spring Security integration                  |
 
 ---
 
@@ -60,8 +60,9 @@ The system adopts **microservices principles** — modularity, scalability, resi
 ## 🧙 Microservices Architecture
 
 <p align="center">
-  <img src="assets/READMEIMAGE.png" alt="JourneyPlanner Architecture" width="800"/>
+  <img src="assets/READMEIMAGE.png" alt="JourneyPlanner Architecture" width="600" height="800"/>
 </p>
+
 
 ---
 
