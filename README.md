@@ -1,5 +1,7 @@
 # 🚀 JourneyPlanner – Full Stack Microservice Application  
-**Plan smarter, travel better**  
+<p align="center">
+  <strong>Plan smarter, travel better</strong>
+</p>
 An enterprise-ready travel planning platform leveraging **Vaadin**, **Spring Boot**, and **Cloud-Native Microservices** to deliver secure, scalable, and responsive travel experiences.
 
 ---
@@ -162,4 +164,6 @@ JourneyPlanner/
 
 ## 📜 License
 
-Licensed under the **MIT License**.
+Licensed under the [**MIT License**](https://opensource.org/licenses/MIT).
+
+
