@@ -2,6 +2,8 @@ package com.milosz.podsiadly.uiservice.security;
 
 import com.milosz.podsiadly.uiservice.config.JwtTokenUtil;
 import com.milosz.podsiadly.uiservice.service.UserClient;
+import com.milosz.podsiadly.uiservice.service.UserProfileClient;
+
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -25,6 +27,7 @@ class OAuth2LoginSuccessHandlerTest {
     private OAuth2AuthorizedClientService authorizedClientService;
     private SpotifyTokenCache spotifyTokenCache;
     private UserClient userClient;
+    private UserProfileClient userProfileClient;
     private OAuth2LoginSuccessHandler handler;
 
     @BeforeAll
@@ -44,8 +47,15 @@ class OAuth2LoginSuccessHandlerTest {
         authorizedClientService = mock(OAuth2AuthorizedClientService.class);
         spotifyTokenCache = mock(SpotifyTokenCache.class);
         userClient = mock(UserClient.class);
+        userProfileClient = mock(UserProfileClient.class);
 
-        handler = new OAuth2LoginSuccessHandler(jwtTokenUtil, authorizedClientService, spotifyTokenCache, userClient);
+        handler = new OAuth2LoginSuccessHandler(
+                jwtTokenUtil,
+                authorizedClientService,
+                spotifyTokenCache,
+                userClient,
+                userProfileClient
+        );
     }
 
     @AfterEach
@@ -81,16 +91,25 @@ class OAuth2LoginSuccessHandlerTest {
         when(client.getAccessToken()).thenReturn(accessToken);
         when(client.getRefreshToken()).thenReturn(refreshToken);
         when(authorizedClientService.loadAuthorizedClient("spotify", "mock-name")).thenReturn(client);
+
         handler.onAuthenticationSuccess(request, response, authentication);
 
+        // cookies added (jwt, spotify_id, spotify_access_token)
         verify(response, atLeast(1)).addCookie(any(Cookie.class));
+
+        // tokens cached
         verify(spotifyTokenCache).update(eq("access-token-xyz"), eq("refresh-token-abc"), anyInt());
+
+        // user + profile created
         verify(userClient).createUserIfNotExists("spotify123", "Test User", "test@example.com");
+        verify(userProfileClient).createProfileIfAbsent("spotify123", "Test User", null, null);
+
+        // redirect to main menu
         verify(response).sendRedirect("/main-menu");
     }
 
     @Test
-    @DisplayName("🟡 Should skip Spotify cookie and user creation when ID is null")
+    @DisplayName("🟡 Should skip Spotify cookie and user/profile creation when ID is null")
     void shouldSkipUserCreationWhenIdIsNull() throws Exception {
         HttpServletRequest request = mock(HttpServletRequest.class);
         HttpServletResponse response = mock(HttpServletResponse.class);
@@ -102,9 +121,11 @@ class OAuth2LoginSuccessHandlerTest {
         when(jwtTokenUtil.generateToken(user)).thenReturn("token");
         when(authentication.getName()).thenReturn("test");
         when(authorizedClientService.loadAuthorizedClient(any(), any())).thenReturn(null);
+
         handler.onAuthenticationSuccess(request, response, authentication);
 
         verify(userClient, never()).createUserIfNotExists(any(), any(), any());
+        verify(userProfileClient, never()).createProfileIfAbsent(any(), any(), any(), any());
         verify(response).sendRedirect("/main-menu");
     }
 }

@@ -161,8 +161,10 @@ class SecurityConfigTest {
             var tokenCache = mock(SpotifyTokenCache.class);
             var jwt = mock(com.milosz.podsiadly.uiservice.config.JwtTokenUtil.class);
             var userClient = mock(com.milosz.podsiadly.uiservice.service.UserClient.class);
+            var userProfileClient = mock(com.milosz.podsiadly.uiservice.service.UserProfileClient.class);
+
             return new com.milosz.podsiadly.uiservice.security.OAuth2LoginSuccessHandler(
-                    jwt, clientService, tokenCache, userClient
+                    jwt, clientService, tokenCache, userClient, userProfileClient
             );
         }
 

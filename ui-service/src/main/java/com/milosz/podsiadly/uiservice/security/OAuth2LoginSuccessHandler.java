@@ -2,6 +2,7 @@ package com.milosz.podsiadly.uiservice.security;
 
 import com.milosz.podsiadly.uiservice.config.JwtTokenUtil;
 import com.milosz.podsiadly.uiservice.service.UserClient;
+import com.milosz.podsiadly.uiservice.service.UserProfileClient;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -26,15 +27,18 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     private final OAuth2AuthorizedClientService authorizedClientService;
     private final SpotifyTokenCache spotifyTokenCache;
     private final UserClient userClient;
+    private final UserProfileClient userProfileClient;
 
     public OAuth2LoginSuccessHandler(JwtTokenUtil jwtTokenUtil,
                                      OAuth2AuthorizedClientService authorizedClientService,
                                      SpotifyTokenCache spotifyTokenCache,
-                                     UserClient userClient) {
+                                     UserClient userClient,
+                                     UserProfileClient userProfileClient) {
         this.jwtTokenUtil = jwtTokenUtil;
         this.authorizedClientService = authorizedClientService;
         this.spotifyTokenCache = spotifyTokenCache;
         this.userClient = userClient;
+        this.userProfileClient = userProfileClient;
     }
 
     @Override
@@ -66,10 +70,11 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             response.addCookie(spotifyIdCookie);
 
             userClient.createUserIfNotExists(spotifyId, name, email);
+            userProfileClient.createProfileIfAbsent(spotifyId, name, null, null);
         }
 
-        OAuth2AuthorizedClient authorizedClient = authorizedClientService.loadAuthorizedClient(
-                "spotify", authentication.getName());
+        OAuth2AuthorizedClient authorizedClient =
+                authorizedClientService.loadAuthorizedClient("spotify", authentication.getName());
 
         if (authorizedClient != null && authorizedClient.getAccessToken() != null) {
             String accessToken = authorizedClient.getAccessToken().getTokenValue();
@@ -81,6 +86,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
                     : null;
 
             spotifyTokenCache.update(accessToken, refreshToken, (int) expiresIn);
+
             Cookie spotifyAccessTokenCookie = new Cookie("spotify_access_token", accessToken);
             spotifyAccessTokenCookie.setPath("/");
             spotifyAccessTokenCookie.setSecure(false);
@@ -88,6 +94,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
             spotifyAccessTokenCookie.setMaxAge((int) expiresIn);
             response.addCookie(spotifyAccessTokenCookie);
         }
+
         response.sendRedirect("/main-menu");
     }
 }

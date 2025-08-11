@@ -2,8 +2,9 @@ package com.milosz.podsiadly.userservice.service;
 
 import com.milosz.podsiadly.userservice.dto.CreateUserRequest;
 import com.milosz.podsiadly.userservice.entity.User;
+import com.milosz.podsiadly.userservice.entity.UserProfile;
+import com.milosz.podsiadly.userservice.repository.UserProfileRepository;
 import com.milosz.podsiadly.userservice.repository.UserRepository;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,5 +29,4 @@ public class UserService {
 
         userRepository.save(user);
     }
-
 }
