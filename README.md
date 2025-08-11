@@ -1,9 +1,8 @@
-# 🚀 JourneyPlanner – Full Stack Microservice Application  
+# 🚀 JourneyPlaner – Full Stack Microservice Application  
 <p align="center">
-  <strong>Plan smarter, travel better</strong>
+  <strong>Plan smarter, travel better</strong><br>
+  An enterprise-ready travel planning platform leveraging <strong>Vaadin</strong>, <strong>Spring Boot</strong>, and <strong>Cloud-Native Microservices</strong> to deliver secure, scalable, and responsive travel experiences.
 </p>
-An enterprise-ready travel planning platform leveraging **Vaadin**, **Spring Boot**, and **Cloud-Native Microservices** to deliver secure, scalable, and responsive travel experiences.
-
 ---
 
 ## 🧠 Executive Summary
