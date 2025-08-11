@@ -1,134 +1,140 @@
-# 🚀 JourneyPlanner – Full Stack Microservice App
-
-**Plan smarter, travel better.**  
-**Built with 💚 Vaadin + Spring Boot + Microservices.**
-
----
-
-### 🧠 Overview
-
-**JourneyPlanner** is a full-stack enterprise-grade web application for planning travel routes using microservices architecture. It leverages the power of **Spring Boot 5.4.3**, **OAuth2**, **JWT**, and **Vaadin** to provide a seamless, secure, and responsive user experience.
-
-🔗 Uses multiple microservices like:
-
-- `gateway-service` (Gateway service)
-- `user-service` (Create user with spotify credentials)
-- `route-service` (Nominatim finding places)
-- `music-service` (Spotify playlists and tracks)
-- `ui-service` (Vaadin frontend with SecurityFilterChain)
-- `eureka-service` (Service Discovery)
-- `config-service` (Centralized config)
-- `config-repo` (Files with dev configuration)
+# 🚀 JourneyPlanner – Full Stack Microservice Application  
+**Plan smarter, travel better**  
+An enterprise-ready travel planning platform leveraging **Vaadin**, **Spring Boot**, and **Cloud-Native Microservices** to deliver secure, scalable, and responsive travel experiences.
 
 ---
 
-### 🧰 Tech Stack
+## 🧠 Executive Summary
 
-| Layer         | Tech                                                 |
-|---------------|------------------------------------------------------|
-| Frontend      | 🔵 Vaadin (Java UI Framework)                        |
-| Backend       | ☕ Spring Boot 5.4.3, Spring Security, Spring Cloud  |
-| Auth          | 🔐 OAuth2, JWT-based auth (no roles)                 |
-| DevOps        | 🐳 Docker, Docker Compose, Gradle                    |
-| Routing       | 🌐 Spring Cloud Gateway                              |
-| Discovery     | 🧭 Netflix Eureka                                    |
-| Data Layer    | 💾 PostgreSQL via Docker                             |
-| Tests         | ✅ Implemented with JUnit & Mockito                  |
+JourneyPlanner is designed as a **distributed, containerized, cloud-ready application** that integrates **routing**, **user identity**, and **contextual music recommendations** into a cohesive, high-performance platform.
 
----
+The system adopts **microservices principles** — modularity, scalability, resilience, and independent deployability.
 
-### 🗺️ Microservices Architecture
-
-```
-                                             +------------------+
-                                             |  config-service  |
-                                             +------------------+
-                                                       |
-                                                       v
-                                           +----------------------+
-                                           |    eureka-service    |
-                                           +-----------+--------- +
-                                                       |
-                                                       v
-                          +-----------------+------------------+-------------------+
-                          |                 |                  |                   |
-                          v                 v                  v                   v  
-                 +---------------+ +---------------+ +------------------+ +----------------+
-                 | user-service  | | route-service | |   music-service  | |   ui-service   |
-                 +---------------+ +---------------+ +------------------+ +----------------+
-                         \                 |                  |                   /
-                          +----------------+------------------+------------------+
-                                                      |
-                                                      v
-                                           +----------------------+
-                                           |   gateway-service    |
-                                           +----------------------+
-                                                      |
-                                                      v
-                                           +----------------------+
-                                           |       frontend       |
-                                           +----------------------+
-```
+**Primary Use Cases:**
+- Plan multi-stop travel routes with real-time data.
+- Associate routes with curated Spotify playlists for enhanced travel experiences.
+- Support secure login via Spotify OAuth2 and JWT token propagation.
+- Run in containerized environments (Docker) with central service discovery & configuration.
 
 ---
 
-### 🔐 Security
+## 🌐 Architectural Principles
 
-- **OAuth2 Login** with `.successHandler(...)`
-- **Logout configuration** in `ui-service` and `gateway-service`
-  - Session invalidation
-  - Cookie cleanup (`jwt`, `spotify_access_token`)
-- **No roles** – JWT grants general access
+1. **Separation of Concerns:** Each microservice encapsulates a single domain responsibility.
+2. **Centralized Service Discovery:** Enables dynamic routing and decouples service consumers from fixed endpoints.
+3. **Externalized Configuration:** Ensures consistency across environments and enables zero-downtime configuration changes.
+4. **Security by Design:** OAuth2 and JWT are integrated across the service mesh without role-based complexity.
+5. **Resiliency:** Netflix Eureka, Spring Cloud Gateway, and container orchestration enhance uptime and fault tolerance.
 
 ---
 
-### 🚀 Running the App
+## 🔗 Service Portfolio
+
+| Service            | Responsibility                                                                   | Tech Highlights                                      |
+|--------------------|----------------------------------------------------------------------------------|------------------------------------------------------|
+| **config-service** | Spring Cloud Config Server – delivers runtime configuration to all microservices | Config profiles: `docker`, dynamic refresh endpoints |
+| **config-repo**    | File storing YML config files                                                    | Branch-based environment separation                  |
+| **eureka-service** | Service registry for runtime service location & load balancing                   | Netflix Eureka                                       |
+| **gateway-service**| API Gateway – request routing, cross-cutting filters                             | Spring Cloud Gateway                                 |
+| **user-service**   | Manages user profiles linked with Spotify OAuth2 accounts                        | Spring Security OAuth2 Client, PostgreSQL            |
+| **route-service**  | Fetches and processes routes using Nominatim/OSRM APIs                           | Async WebClient, caching layer                       |
+| **music-service**  | Retrieves playlists/tracks from Spotify API                                      | Spotify Web API integration                          |
+| **ui-service**     | Vaadin 24 frontend, security context-aware navigation, JWT propagation           | Vaadin, Spring Security integration                  |
+
+---
+
+## 🧰 Technology Stack
+
+| Layer         | Technology Choices                                                                 |
+|---------------|-------------------------------------------------------------------------------------|
+| **Frontend**  | 🔵 Vaadin 24 (Java-based Reactive UI)                                               |
+| **Backend**   | ☕ Spring Boot 5.4.3, Spring Security, Spring Cloud                                 |
+| **Auth**      | 🔐 OAuth2, JWT bearer tokens                                                        |
+| **DevOps**    | 🐳 Docker, Docker Compose, Gradle                                                   |
+| **Gateway**   | 🌐 Spring Cloud Gateway                                                             |
+| **Discovery** | 🧭 Netflix Eureka                                                                  |
+| **Database**  | 💾 PostgreSQL (containerized)                                                      |
+| **Testing**   | ✅ JUnit, Mockito                                                                   |
+
+---
+## 🧙 Microservices Architecture
+
+<p align="center">
+  <img src="assets/READMEIMAGE.png" alt="JourneyPlanner Architecture" width="800"/>
+</p>
+
+---
+
+## 🗺️ High-Level Architecture
+
+**Interaction Flow:**
+1. **UI-Service** → **Gateway-Service** → routes requests to backend services.
+2. **Gateway-Service** consults **Eureka-Service** for service location.
+3. All services load configuration from **Config-Service**, backed by **Config-Repo**.
+4. **User-Service** uses database to save trip plans.
+5. **Route-Service** uses Nominatim API, OSRM routing for location data.
+6. **Music-Service** queries Spotify Web API for playlist/track data.
+7. Data aggregated & returned to UI for rendering.
+
+---
+
+## 🔐 Security Design
+
+- **OAuth2 Authorization Code Flow** with Spotify.
+- **JWT Token** issued upon authentication.
+- **Stateless Session Management**: All state encapsulated in JWT claims.
+- **Logout Flow** invalidates tokens and clears relevant cookies (`jwt`, `spotify_access_token`).
+- **Zero Roles Policy**: Simplified access – all authenticated users have equal privileges.
+
+---
+
+## 🚀 Local Development Workflow
 
 ```bash
-./gradlew clean build 'or' gradle clean build
+# Build all services
+./gradlew clean build
+
+# Start the microservices environment
 docker-compose up --build
 ```
 
----
-### 🖼️ Spotify Accounts 
-
-Due to restrictions and **Spotify** policy, access to the application is with provided credentials or login via Apple account.
-
-**Email**
-```bash
-accspotifyadvjourneyplaner@gmail.com
+**Access URL:**
 ```
-**Password**
-```bash
-JourneyPlaner1
+http://127.0.0.1:3001/login
 ```
-- **Visit**
-```bash
-127.0.0.1:3001/login
-```
----
-### 🖼️ Frontend (Vaadin)
-
-- **Reactive UI** using Vaadin 24
-- **Spring Security-aware views**
-- **JWT-aware access logic**
-- Runs inside `ui-service` Docker container
 
 ---
 
-### ⚙️ Dev Profiles & Config
+## 🎵 Spotify Integration
 
-Environment config is handled via **Spring Cloud Config**. Supported profiles:
-
-- `docker` (default for compose)
-
-Configuration stored in `config-repo` and pulled during service startup.
+- Due to restrictions and Spotify policy, access to the application is with provided credentials or login via Apple account.
+- Provided developer account for local testing:  
+  ```
+  Email:    accspotifyadvjourneyplaner@gmail.com
+  Password: JourneyPlaner1
+  ```
 
 ---
 
-### 🗃️ Folder Structure
+## 🖼️ Frontend Features
 
-```
+- **Reactive UI** powered by Vaadin 24.
+- **Role-free Security**
+- **Responsive Design**
+- **Event-Driven Navigation** 
+
+---
+
+## ⚙️ Configuration & Profiles
+
+- **Profile:** `docker` (default for Docker Compose)
+- **Externalized Config:** Managed via Config-Service from Config-Repo.
+
+---
+
+## 📂 Repository Layout
+
+```plaintext
 JourneyPlanner/
 ├── config-service/
 ├── config-repo/
@@ -145,22 +151,14 @@ JourneyPlanner/
 
 ---
 
-### 🧙 Tips for Deployment
+## 🧑‍💻 Maintainer
 
-1. Place NGINX or Traefik in front of `gateway-service` for SSL
-2. Use centralized logging (e.g., Loki + Grafana)
-3. Enable Docker health checks for all services
-
----
-
-### 🧑‍💻 Maintainer 💚
-
-- **Milosz Podsiadly**
-- ✉️ [m.podsiadly99@gmail.com](mailto:m.podsiadly99@gmail.com)
-- 🔗 [GitHub – MiloszPodsiadly](https://github.com/MiloszPodsiadly)
+**Milosz Podsiadly**  
+📧 m.podsiadly99@gmail.com  
+🔗 [GitHub – MiloszPodsiadly](https://github.com/MiloszPodsiadly)  
 
 ---
 
-### 📜 License
+## 📜 License
 
-Licensed under the [MIT License](https://opensource.org/licenses/MIT).
+Licensed under the **MIT License**.
