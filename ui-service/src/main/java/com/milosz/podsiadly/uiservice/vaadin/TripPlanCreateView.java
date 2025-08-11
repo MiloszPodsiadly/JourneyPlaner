@@ -153,7 +153,7 @@ public class TripPlanCreateView extends VerticalLayout {
             });
 
             HorizontalLayout actions = new HorizontalLayout(editBtn, deleteBtn);
-            Button renameBtn = new Button("✏️ Change name and description");
+            Button renameBtn = new Button("✏️ Change name and description or save changes");
             if (editModePlanIds.contains(plan.id())) {
                 renameBtn.addClickListener(ev -> openEditDialog(plan, token));
                 actions.add(renameBtn);
