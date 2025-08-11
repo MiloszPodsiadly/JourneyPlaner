@@ -8,14 +8,14 @@ import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.Route;
 
+import com.vaadin.flow.server.auth.AnonymousAllowed;
 import jakarta.annotation.security.PermitAll;
 
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 
 
-@Route("login")
-@PermitAll
+@Route("login-home")
 public class LoginView extends VerticalLayout {
 
     public LoginView(ClientRegistrationRepository clientRegistrationRepository) {
