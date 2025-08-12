@@ -40,7 +40,10 @@ public class TripPlanCreateView extends VerticalLayout {
 
     private final TripPlanClient tripPlanClient = new TripPlanClient();
     private List<TripPlanDto> allPlans = List.of();
+
     private final Set<Long> editModePlanIds = new HashSet<>();
+
+    private final Map<Long, List<Long>> pendingPlaceOrder = new HashMap<>();
 
     public TripPlanCreateView() {
         setSpacing(true);
@@ -95,11 +98,6 @@ public class TripPlanCreateView extends VerticalLayout {
 
         sortSelect.addValueChangeListener(e ->
                 updatePlanList(plansLayout, search.getValue(), e.getValue(), token));
-
-        Button backBottom = new Button("⬅ Back to menu", new Icon(VaadinIcon.ARROW_LEFT));
-        backBottom.addClickListener(e -> getUI().ifPresent(ui -> ui.navigate("main-menu")));
-        backBottom.getStyle().set("margin-top", "30px");
-        add(backBottom);
     }
 
     private void updatePlanList(VerticalLayout layout, String filter, String sort, String token) {
@@ -134,10 +132,44 @@ public class TripPlanCreateView extends VerticalLayout {
             Paragraph desc = new Paragraph(plan.description());
             desc.getStyle().set("text-align", "center");
 
-            Button editBtn = new Button("Edit", new Icon(VaadinIcon.EDIT));
+            boolean editing = editModePlanIds.contains(plan.id());
+
+            Button editBtn = new Button(
+                    editing ? "Save & Exit" : "Edit",
+                    new Icon(VaadinIcon.EDIT)
+            );
             editBtn.addClickListener(ev -> {
-                if (editModePlanIds.contains(plan.id())) editModePlanIds.remove(plan.id());
-                else editModePlanIds.add(plan.id());
+                boolean wasEditing = editModePlanIds.contains(plan.id());
+
+                if (wasEditing) {
+                    try {
+                        List<Long> pending = pendingPlaceOrder.get(plan.id());
+                        if (pending == null) {
+                            pending = plan.places() == null ? List.of()
+                                    : plan.places().stream().map(p -> p.id()).collect(Collectors.toList());
+                        }
+                        log.info("Saving place order for plan {} -> {}", plan.id(), pending);
+                        tripPlanClient.reorderPlaces(plan.id(), pending, token);
+                        pendingPlaceOrder.remove(plan.id());
+                        Notification.show("✅ Changes saved", 1500, Notification.Position.BOTTOM_START);
+                        getUI().ifPresent(ui -> ui.getPage().reload());
+                    } catch (Exception ex) {
+                        log.error("Failed to save changes on exit", ex);
+                        Notification.show("❌ Failed to save changes", 2500, Notification.Position.MIDDLE);
+                        updatePlanList(layout, filter, sort, token);
+                        return;
+                    }
+                    editModePlanIds.remove(plan.id());
+                } else {
+                    editModePlanIds.add(plan.id());
+                    if (plan.places() != null) {
+                        List<Long> current = plan.places().stream()
+                                .map(p -> p.id())
+                                .collect(Collectors.toList());
+                        pendingPlaceOrder.put(plan.id(), current);
+                    }
+                }
+
                 updatePlanList(layout, filter, sort, token);
             });
 
@@ -153,19 +185,29 @@ public class TripPlanCreateView extends VerticalLayout {
             });
 
             HorizontalLayout actions = new HorizontalLayout(editBtn, deleteBtn);
-            Button renameBtn = new Button("✏️ Change name and description or save changes");
-            if (editModePlanIds.contains(plan.id())) {
-                renameBtn.addClickListener(ev -> openEditDialog(plan, token));
+
+            Button renameBtn = new Button("✏️ Change name/description");
+            renameBtn.addClickListener(ev -> openEditDialog(plan, token));
+            if (editing) {
                 actions.add(renameBtn);
             }
+
             card.add(name, desc, actions);
 
             if (plan.places() != null && !plan.places().isEmpty()) {
-                boolean editing = editModePlanIds.contains(plan.id());
-
                 H4 placesHeader = new H4("📍 Places");
                 placesHeader.getStyle().set("margin-top", "20px");
                 card.add(placesHeader);
+
+                if (editing) {
+                    Span hint = new Span(pendingPlaceOrder.containsKey(plan.id())
+                            ? "Drag to reorder, delete to remove. Click “Save & Exit” to persist."
+                            : "Drag to reorder, delete to remove.");
+                    hint.getStyle()
+                            .set("font-size", "var(--lumo-font-size-s)")
+                            .set("color", "var(--lumo-secondary-text-color)");
+                    card.add(hint);
+                }
 
                 VerticalLayout placesLayout = new VerticalLayout();
                 placesLayout.setPadding(false);
@@ -175,18 +217,30 @@ public class TripPlanCreateView extends VerticalLayout {
                 placesLayout.getStyle().set("border-radius", "8px");
                 placesLayout.getStyle().set("padding", "6px");
 
-                Runnable persistOrder = () -> {
-                    try {
+                if (editing) {
+                    DropTarget<VerticalLayout> listDrop = DropTarget.create(placesLayout);
+                    listDrop.setDropEffect(DropEffect.MOVE);
+                    listDrop.addDropListener(e -> {
+                        Object data = e.getDragData().orElse(null);
+                        if (!(data instanceof String draggedId)) return;
+
+                        Component draggedRow = placesLayout.getChildren()
+                                .filter(c -> draggedId.equals(c.getId().orElse(null)))
+                                .findFirst().orElse(null);
+                        if (draggedRow == null) return;
+
+                        placesLayout.remove(draggedRow);
+                        placesLayout.add(draggedRow);
+
                         List<Long> orderedIds = placesLayout.getChildren()
                                 .map(c -> Long.valueOf(c.getId().orElseThrow()))
                                 .collect(Collectors.toList());
-                        tripPlanClient.reorderPlaces(plan.id(), orderedIds, token);
-                        Notification.show("✅ Order saved", 1000, Notification.Position.BOTTOM_START);
-                    } catch (Exception ex) {
-                        log.error("Reorder failed", ex);
-                        Notification.show("❌ Failed to save order", 2500, Notification.Position.MIDDLE);
-                    }
-                };
+                        pendingPlaceOrder.put(plan.id(), orderedIds);
+
+                        Notification.show("Moved to position " + orderedIds.size() + " (pending)",
+                                1200, Notification.Position.BOTTOM_START);
+                    });
+                }
 
                 plan.places().forEach(place -> {
                     String display = place.displayName() != null ? place.displayName() : "[No place name]";
@@ -225,7 +279,7 @@ public class TripPlanCreateView extends VerticalLayout {
 
                         DragSource<Button> drag = DragSource.create(handle);
                         drag.setDraggable(true);
-                        drag.setDragData(place.id());
+                        drag.setDragData(String.valueOf(place.id()));
                         drag.addDragStartListener(e -> handle.getStyle().set("cursor", "grabbing"));
                         drag.addDragEndListener(e -> handle.getStyle().set("cursor", "grab"));
 
@@ -233,10 +287,10 @@ public class TripPlanCreateView extends VerticalLayout {
                         drop.setDropEffect(DropEffect.MOVE);
                         drop.addDropListener(e -> {
                             Object data = e.getDragData().orElse(null);
-                            if (!(data instanceof Long draggedId)) return;
+                            if (!(data instanceof String draggedId)) return;
 
                             Component draggedRow = placesLayout.getChildren()
-                                    .filter(c -> c.getId().isPresent() && c.getId().get().equals(String.valueOf(draggedId)))
+                                    .filter(c -> draggedId.equals(c.getId().orElse(null)))
                                     .findFirst().orElse(null);
                             if (draggedRow == null || draggedRow == row) return;
 
@@ -247,10 +301,13 @@ public class TripPlanCreateView extends VerticalLayout {
                             placesLayout.remove(draggedRow);
                             placesLayout.addComponentAtIndex(to, draggedRow);
 
-                            Notification.show("Moved to position " + (to + 1),
-                                    1200, Notification.Position.BOTTOM_START);
+                            List<Long> orderedIds = placesLayout.getChildren()
+                                    .map(c -> Long.valueOf(c.getId().orElseThrow()))
+                                    .collect(Collectors.toList());
+                            pendingPlaceOrder.put(plan.id(), orderedIds);
 
-                            persistOrder.run();
+                            Notification.show("Position: " + (to + 1) + " (pending)",
+                                    1200, Notification.Position.BOTTOM_START);
                         });
 
                     } else {
@@ -282,7 +339,7 @@ public class TripPlanCreateView extends VerticalLayout {
                     Button plBtn = new Button(namePl);
                     plBtn.getStyle().set("white-space", "normal").set("text-align", "left").set("width", "100%");
 
-                    if (editModePlanIds.contains(plan.id())) {
+                    if (editing) {
                         plBtn.setIcon(new Icon(VaadinIcon.TRASH));
                         plBtn.addClickListener(ev -> {
                             try {
