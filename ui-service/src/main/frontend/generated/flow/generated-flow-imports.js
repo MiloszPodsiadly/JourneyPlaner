@@ -10,29 +10,29 @@ import 'Frontend/generated/jar-resources/ReactRouterOutletElement.tsx';
 
 const loadOnDemand = (key) => {
   const pending = [];
-  if (key === '0361c7bdaa63285d8a4a330c15827ddaabb31c1dc31c4f0e40235eee91be2ef3') {
-    pending.push(import('./chunks/chunk-e045ef5a031e111b82410052df809428f03e3f7ba390a8b9f35fceb5b00478e4.js'));
-  }
-  if (key === '52ba0ab5e9c6f88fb1f298024e81683b11c05fd7c355afd877f4f3d3fd2910b6') {
-    pending.push(import('./chunks/chunk-cd6a3b6f6faebed1493d078a30ed7b10109a53d1122ed5addaf07959b749bfe6.js'));
-  }
   if (key === '0430dfa78a905da6fb6f10a292b0830a0af4e2923afbc18fa82aae6f7b683403') {
     pending.push(import('./chunks/chunk-e045ef5a031e111b82410052df809428f03e3f7ba390a8b9f35fceb5b00478e4.js'));
-  }
-  if (key === '5842162c740c88eb96a3034249f540b8e3afb84091c1add18bb10a31e09ff862') {
-    pending.push(import('./chunks/chunk-c585522e5491b0295056504010bbdc2881a45c401468a7b670e026998377dc27.js'));
-  }
-  if (key === '0602fe0aa3c2563d2c3b80d72157b9373eae68df2969b8db1331aa82fff7ad49') {
-    pending.push(import('./chunks/chunk-f803df643c07aa37eee57a440b68a91abb3cd3408a72bcc573024c04162131e4.js'));
-  }
-  if (key === '385dd6ae902a59f7db7459618f93f6d81cdf61ab6c1c190eaf2955f65c648b2a') {
-    pending.push(import('./chunks/chunk-9a4b670d01bf85f3b08f9032a6aef67682b4bd48cc884c40696cdfc9ae8670de.js'));
   }
   if (key === '452559c3101f2409b645464ec6ee2be231d4ac537bd89f1cfe7b28b19f0316eb') {
     pending.push(import('./chunks/chunk-782232ae5d8f3763a9cd985babbb97e9a0b327b50b9fae3030d8b6f1d7cc86c0.js'));
   }
   if (key === '340c91281729eadf9e162e80c437a2e2af3576c00795e33b86240cf06883f863') {
     pending.push(import('./chunks/chunk-785834d96060bb7fd4f038a87702951554433eb75cc54b243b5ebdbc88bc6849.js'));
+  }
+  if (key === '5842162c740c88eb96a3034249f540b8e3afb84091c1add18bb10a31e09ff862') {
+    pending.push(import('./chunks/chunk-c585522e5491b0295056504010bbdc2881a45c401468a7b670e026998377dc27.js'));
+  }
+  if (key === '52ba0ab5e9c6f88fb1f298024e81683b11c05fd7c355afd877f4f3d3fd2910b6') {
+    pending.push(import('./chunks/chunk-cd6a3b6f6faebed1493d078a30ed7b10109a53d1122ed5addaf07959b749bfe6.js'));
+  }
+  if (key === '385dd6ae902a59f7db7459618f93f6d81cdf61ab6c1c190eaf2955f65c648b2a') {
+    pending.push(import('./chunks/chunk-9a4b670d01bf85f3b08f9032a6aef67682b4bd48cc884c40696cdfc9ae8670de.js'));
+  }
+  if (key === '0602fe0aa3c2563d2c3b80d72157b9373eae68df2969b8db1331aa82fff7ad49') {
+    pending.push(import('./chunks/chunk-f803df643c07aa37eee57a440b68a91abb3cd3408a72bcc573024c04162131e4.js'));
+  }
+  if (key === '0361c7bdaa63285d8a4a330c15827ddaabb31c1dc31c4f0e40235eee91be2ef3') {
+    pending.push(import('./chunks/chunk-e045ef5a031e111b82410052df809428f03e3f7ba390a8b9f35fceb5b00478e4.js'));
   }
   return Promise.all(pending);
 }
