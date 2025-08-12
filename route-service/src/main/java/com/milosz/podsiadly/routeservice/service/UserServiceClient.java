@@ -14,7 +14,6 @@ public class UserServiceClient {
 
     private final RestTemplate restTemplate;
 
-    // Na sztywno — service discovery w Dockerze/Eurece i tak znajdzie po nazwie hosta
     private static final String BASE_URL = "http://user-service:8081";
 
     public UserServiceClient(RestTemplate restTemplate) {
