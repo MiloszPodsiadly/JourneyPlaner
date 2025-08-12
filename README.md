@@ -2,7 +2,7 @@
 <p align="center">
   <strong>Plan smarter, travel better</strong><br>
 </p>
-  A large-scale, business-grade travel planning platform built with Vaadin, Spring Boot, and cloud-based microservices, designed to be secure, easy to grow, and work smoothly for many users at once.
+  A large-scale, business-grade travel planning platform built with Vaadin, Spring Boot, and cloud-based microservices, designed to be secure, easy to grow, and work smoothly for user experience at once.
 
 ---
 
