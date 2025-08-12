@@ -110,7 +110,7 @@ http://127.0.0.1:3001/login
 
 ## 🎵 Spotify Integration
 
-- Due to restrictions and Spotify policy, access to the application is with provided credentials or login via Apple account.
+Due to restrictions and Spotify policy, access to the application is with provided credentials or login via Apple account.
 - Provided developer account for local testing:  
   ```
   Email:    accspotifyadvjourneyplaner@gmail.com
