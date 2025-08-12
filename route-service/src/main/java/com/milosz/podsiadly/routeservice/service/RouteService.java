@@ -52,11 +52,11 @@ public class RouteService {
     public List<LocationDto> searchTopPlaces(String city) {
         try {
             String query = "points of interest in " + city;
-            String url = String.format("%s/search?format=json&q=%s&limit=5",
+            String url = String.format("%s/search?format=json&q=%s&limit=10",
                     nominatimBaseUrl,
                     URLEncoder.encode(query, StandardCharsets.UTF_8));
 
-            System.out.println("🌍 Fetching top 5 places from Nominatim with URL = " + url);
+            System.out.println("🌍 Fetching top 10 places from Nominatim with URL = " + url);
 
             HttpHeaders headers = new HttpHeaders();
             headers.set("User-Agent", "travel-app");
@@ -79,7 +79,7 @@ public class RouteService {
     public LocationDto[] searchPlacesByCategory(String city, String category) {
         try {
             String query = String.format("%s in %s", category, city);
-            String url = String.format("%s/search?format=json&q=%s&limit=5&addressdetails=1",
+            String url = String.format("%s/search?format=json&q=%s&limit=10&addressdetails=1",
                     nominatimBaseUrl,
                     URLEncoder.encode(query, StandardCharsets.UTF_8));
 
