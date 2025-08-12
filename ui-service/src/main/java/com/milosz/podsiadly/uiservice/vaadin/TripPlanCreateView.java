@@ -133,6 +133,7 @@ public class TripPlanCreateView extends VerticalLayout {
             desc.getStyle().set("text-align", "center");
 
             boolean editing = editModePlanIds.contains(plan.id());
+            boolean hasPlaces = plan.places() != null && !plan.places().isEmpty();
 
             Button editBtn = new Button(
                     editing ? "Save & Exit" : "Edit",
@@ -140,6 +141,14 @@ public class TripPlanCreateView extends VerticalLayout {
             );
             editBtn.addClickListener(ev -> {
                 boolean wasEditing = editModePlanIds.contains(plan.id());
+
+                if (wasEditing && !hasPlaces) {
+                    pendingPlaceOrder.remove(plan.id());
+                    editModePlanIds.remove(plan.id());
+                    Notification.show("Nothing to save", 1200, Notification.Position.BOTTOM_START);
+                    updatePlanList(layout, filter, sort, token);
+                    return;
+                }
 
                 if (wasEditing) {
                     try {
