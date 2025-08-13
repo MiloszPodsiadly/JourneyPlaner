@@ -94,9 +94,6 @@ The system adopts **microservices principles** — modularity, scalability, resi
 ## 🚀 Local Development Workflow
 
 ```bash
-# Build all services
-./gradlew clean build
-
 # Start the microservices environment
 docker-compose up --build
 ```
@@ -150,7 +147,8 @@ JourneyPlanner/
 ├── user-service/
 ├── build.gradle
 ├── docker-compose.yml
-└── README.md
+├── README.md
+└── settings.gradle
 ```
 
 ---
