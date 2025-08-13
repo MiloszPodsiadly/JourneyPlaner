@@ -144,8 +144,8 @@ JourneyPlanner/
 ├── config-service/
 ├── eureka-service/
 ├── gateway-service/
-├── route-service/
 ├── music-service/
+├── route-service/
 ├── ui-service/
 ├── user-service/
 ├── build.gradle
