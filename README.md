@@ -139,14 +139,15 @@ Due to restrictions and Spotify policy, access to the application is with provid
 
 ```plaintext
 JourneyPlanner/
-├── config-service/
+├── assets/
 ├── config-repo/
+├── config-service/
 ├── eureka-service/
 ├── gateway-service/
 ├── route-service/
 ├── music-service/
-├── user-service/
 ├── ui-service/
+├── user-service/
 ├── build.gradle
 ├── docker-compose.yml
 └── README.md
