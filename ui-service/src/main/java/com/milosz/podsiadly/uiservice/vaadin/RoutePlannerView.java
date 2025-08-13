@@ -73,7 +73,7 @@ public class RoutePlannerView extends VerticalLayout {
         cityInfoButton.addClickListener(e -> {
             String city = cityInput.getValue();
             if (isValidQuery(city)) {
-                fetchLocations(city, 1, /*allowAddToPlan=*/false);
+                fetchLocations(city, 3, /*allowAddToPlan=*/false);
             } else {
                 showWarning("⚠️ Type the name of the city.");
             }
@@ -84,7 +84,7 @@ public class RoutePlannerView extends VerticalLayout {
             String category = categorySelect.getValue();
 
             if (isValidQuery(city) && isValidQuery(category)) {
-                fetchLocations(category + " in " + city, 5, /*allowAddToPlan=*/true);
+                fetchLocations(category + " in " + city, 10, /*allowAddToPlan=*/true);
             } else {
                 showWarning("⚠️ Type the city name and select a category.");
             }

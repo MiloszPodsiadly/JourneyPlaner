@@ -121,7 +121,7 @@ class RouteServiceTest {
         String uri = uriCaptor.getValue().toString();
         assertThat(uri).startsWith(baseUrl + "/search?format=json&q=");
         assertThat(uri).contains("points+of+interest+in+Krak%C3%B3w");
-        assertThat(uri).endsWith("&limit=5");
+        assertThat(uri).endsWith("&limit=10");
 
         HttpHeaders headers = entityCaptor.getValue().getHeaders();
         assertThat(headers.getFirst("User-Agent")).isEqualTo("travel-app");
@@ -160,7 +160,7 @@ class RouteServiceTest {
         String uri = uriCaptor.getValue().toString();
         assertThat(uri).startsWith(baseUrl + "/search?format=json&q=");
         assertThat(uri).contains("museums+%26+galleries+in+Gdansk");
-        assertThat(uri).contains("&limit=5&addressdetails=1");
+        assertThat(uri).contains("&limit=10&addressdetails=1");
 
         HttpHeaders headers = entityCaptor.getValue().getHeaders();
         assertThat(headers.getFirst("User-Agent")).isEqualTo("travel-app");
