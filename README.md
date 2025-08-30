@@ -2,13 +2,13 @@
 <p align="center">
   <strong>Plan smarter, travel better</strong><br>
 </p>
-  A large-scale, business-grade travel planning platform built with Vaadin, Spring Boot, and cloud-based microservices, designed to be secure, easy to grow, and work smoothly for user experience at once.
+  A large-scale, travel planning platform built with Vaadin, Spring Boot, and cloud-based microservices, designed to be secure, easy to grow, and work smoothly for user experience at once.
 
 ---
 
 ## 🧠 Executive Summary
 
-JourneyPlanner is designed as a **distributed, containerized, cloud-ready application** that integrates **routing**, **user identity**, and **contextual music recommendations** into a cohesive, high-performance platform.
+JourneyPlanner is designed as a **distributed, containerized** that integrates **routing**, **user identity**, and ** music playlists** into a cohesive, high-performance platform.
 
 The system adopts **microservices principles** — modularity, scalability, resilience, and independent deployability.
 
@@ -99,22 +99,13 @@ docker-compose up --build
 ```
 
 **Access URL:**
+
 ```
 http://127.0.0.1:3001/login
 ```
 
 ---
 
-## 🎵 Spotify Integration
-
-Due to restrictions and Spotify policy, access to the application is with provided credentials or login via Apple account.
-- Provided developer account for local testing:  
-  ```
-  Email:    accspotifyadvjourneyplaner@gmail.com
-  Password: JourneyPlaner1
-  ```
-
----
 
 ## 🖼️ Frontend Features
 
